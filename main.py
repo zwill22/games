@@ -54,7 +54,10 @@ def main():
 
     ground_list = level.ground(1, gloc, tx, ty)
     plat_list = level.platform(1, tx, ty)
-    enemy_list = level.bad(1, [300, 0])
+
+    eloc = [plat_list.sprites()[1].rect.x,
+            plat_list.sprites()[1].rect.y - ty]
+    enemy_list = level.bad(1, eloc)
 
     input_type = "keyboard"
 
@@ -130,12 +133,15 @@ def main():
 
         world.blit(backdrop, backdropbox)
         player.update(enemy_list)
-        player_list.draw(world)
-        enemy_list.draw(world)
+        for enemy in enemy_list:
+            enemy.move()
+            enemy.update(player_list)
+
         ground_list.draw(world)
         plat_list.draw(world)
-        for e in enemy_list:
-            e.move()
+        player_list.draw(world)
+        enemy_list.draw(world)
+
         pygame.display.flip()
         clock.tick(fps)
 

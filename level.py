@@ -66,8 +66,8 @@ def platform(lvl, tx, ty):
     plat_list = pygame.sprite.Group()
     ploc = []
     if lvl == 1:
-        ploc.append((200, worldy-ty-128, 3))
         ploc.append((300, worldy-ty-256, 4))
+        ploc.append((200, worldy-ty-128, 3))
         ploc.append((500, worldy-ty-128, 4))
         for pl in ploc:
             for j in range(pl[2] + 1):

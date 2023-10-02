@@ -81,7 +81,7 @@ class Player(pygame.sprite.Sprite):
         hit_list = pygame.sprite.spritecollide(self, enemy_list, False)
         for enemy in hit_list:
             self.health -= 1
-        print("Player health: {}".format(self.health))
+            print("Player health: {}".format(self.health))
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -106,22 +106,47 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = y
 
         self.counter = 0
+        self.frame = 0
+
+        self.forward = True
+        self.health = 1
 
     def move(self):
         """
         Enemy movement
         """
-        distance = 50
-        speed = 6
+        distance = 30
+        speed = 4
 
-        if 0 <= self.counter < distance:
+        if 0 <= self.counter <= distance:
             self.rect.x += speed
-        elif distance <= self.counter <= distance * 2:
+            self.forward = True
+        elif distance < self.counter <= distance * 2:
             self.rect.x -= speed
+            self.forward = False
         else:
             self.counter = 0
 
         self.counter += 1
+
+    def update(self, player_list):
+        """
+        Update sprite position
+        """
+        self.frame += 1
+        if self.frame > 3 * ani:
+            self.frame = 0
+
+        if self.forward:
+            self.image = self.images[self.frame // ani]
+        else:
+            self.image = pygame.transform.flip(
+                self.images[self.frame//ani], True, False
+            )
+
+        hit_list = pygame.sprite.spritecollide(self, player_list, False)
+        for player in hit_list:
+            self.health -= 1
 
 
 class Platform(pygame.sprite.Sprite):
