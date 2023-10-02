@@ -32,6 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.movex = 0
         self.movey = 0
         self.frame = 0
+        self.health = 10
 
         self.images = []
         for i in range(4):
@@ -58,7 +59,7 @@ class Player(pygame.sprite.Sprite):
         self.movex = 0
         self.movey = 0
 
-    def update(self):
+    def update(self, enemy_list):
         """
         Update sprite position
         """
@@ -77,6 +78,63 @@ class Player(pygame.sprite.Sprite):
 
         if self.movex > 0:
             self.image = self.images[self.frame//ani]
+
+        hit_list = pygame.sprite.spritecollide(self, enemy_list, False)
+        for enemy in hit_list:
+            self.health -= 1
+        print("Player health: {}".format(self.health))
+
+
+class Enemy(pygame.sprite.Sprite):
+    """
+    Spawn an enemy
+    """
+    def __init__(self, x, y, img):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.images = []
+        for i in range(4):
+            im = pygame.image.load(
+                os.path.join('images', '{}-{}.png'.format(img, i))
+            ).convert()
+            im.convert_alpha()
+            im.set_colorkey(0)
+            self.images.append(im)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+
+        self.rect.x = x
+        self.rect.y = y
+
+        self.counter = 0
+
+    def move(self):
+        """
+        Enemy movement
+        """
+        distance = 50
+        speed = 6
+
+        if 0 <= self.counter < distance:
+            self.rect.x += speed
+        elif distance <= self.counter <= distance * 2:
+            self.rect.x -= speed
+        else:
+            self.counter = 0
+
+        self.counter += 1
+
+
+class Level:
+    def bad(self, lvl, eloc):
+        if lvl == 1:
+            enemy = Enemy(eloc[0], eloc[1], 'enemy')
+            enemy_list = pygame.sprite.Group()
+            enemy_list.add(enemy)
+        else:
+            ValueError("Invalid level: {}".format(lvl))
+
+        return enemy_list
 
 
 def main():
@@ -108,6 +166,8 @@ def main():
     player_list = pygame.sprite.Group()
     player_list.add(player)
     steps = 10
+
+    enemy_list = Level.bad(1, [300, 0])
 
     input_type = "keyboard"
 
@@ -182,8 +242,11 @@ def main():
                     player.stop()
 
         world.blit(backdrop, backdropbox)
-        player.update()
+        player.update(enemy_list)
         player_list.draw(world)
+        enemy_list.draw(world)
+        for e in enemy_list:
+            e.move()
         pygame.display.flip()
         clock.tick(fps)
 
