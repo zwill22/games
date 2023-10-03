@@ -115,6 +115,8 @@ class Enemy(pygame.sprite.Sprite):
         self.counter = 0
         self.frame = 0
 
+        self.movey = 0
+
         self.forward = True
         self.health = 1
 
@@ -135,6 +137,17 @@ class Enemy(pygame.sprite.Sprite):
             self.counter = 0
 
         self.counter += 1
+
+    def gravity(self, ty):
+        """
+        Simulate gravity on enemy
+        """
+        self.movey += 2
+        self.rect.y += self.movey
+
+        if self.rect.y > worldy and self.movey >= 0:
+            self.movey = 0
+            self.rect.y = worldy - ty - ty
 
     def update(self, player_list):
         """

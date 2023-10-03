@@ -136,6 +136,7 @@ def main():
         player.update(enemy_list)
         for enemy in enemy_list:
             enemy.move()
+            enemy.gravity(ty)
             enemy.update(player_list)
 
         ground_list.draw(world)
