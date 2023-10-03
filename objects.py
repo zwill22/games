@@ -33,6 +33,9 @@ class Player(pygame.sprite.Sprite):
         self.frame = 0
         self.health = 10
 
+        self.is_jumping = True
+        self.is_falling = False
+
         self.images = []
         for i in range(4):
             img = pygame.image.load(
@@ -45,11 +48,8 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def gravity(self, ty):
-        self.movey += 2
-
-        if self.rect.y > worldy and self.movey >= 0:
-            self.movey = 0
-            self.rect.y = worldy - ty - ty
+        if self.is_jumping:
+            self.movey += 2
 
     def control(self, x, y):
         """
@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
         self.movex = 0
         self.movey = 0
 
-    def update(self, enemy_list):
+    def update(self, enemy_list, ground_list, tx, ty):
         """
         Update sprite position
         """
@@ -89,6 +89,20 @@ class Player(pygame.sprite.Sprite):
         for enemy in hit_list:
             self.health -= 1
             print("Player health: {}".format(self.health))
+
+        ground_hit_list = pygame.sprite.spritecollide(
+            self, ground_list, False)
+        for g in ground_hit_list:
+            self.movey = 0
+            self.rect.bottom = g.rect.top
+            self.is_jumping = False
+
+        # Fall off the world
+        if self.rect.y > worldy:
+            self.health -= 1
+            print(self.health)
+            self.rect.x = tx
+            self.rect.y = ty
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -116,6 +130,7 @@ class Enemy(pygame.sprite.Sprite):
         self.frame = 0
 
         self.movey = 0
+        self.is_falling = True
 
         self.forward = True
         self.health = 1
@@ -142,14 +157,15 @@ class Enemy(pygame.sprite.Sprite):
         """
         Simulate gravity on enemy
         """
-        self.movey += 2
-        self.rect.y += self.movey
+        if self.is_falling:
+            self.movey += 2
+            self.rect.y += self.movey
 
         if self.rect.y > worldy and self.movey >= 0:
             self.movey = 0
             self.rect.y = worldy - ty - ty
 
-    def update(self, player_list):
+    def update(self, player_list, ground_list, plat_list):
         """
         Update sprite position
         """
@@ -167,6 +183,14 @@ class Enemy(pygame.sprite.Sprite):
         hit_list = pygame.sprite.spritecollide(self, player_list, False)
         for player in hit_list:
             self.health -= 1
+
+        for ob_list in (ground_list, plat_list):
+            ground_hit_list = pygame.sprite.spritecollide(
+            self, ob_list, False)
+            for g in ground_hit_list:
+                self.movey = 0
+                self.rect.bottom = g.rect.top
+                self.is_falling = False
 
 
 class Platform(pygame.sprite.Sprite):

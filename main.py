@@ -40,7 +40,7 @@ def main():
     tx = 64
     ty = 64
 
-    i=0
+    i = 0
     while i < (worldx/tx)+tx:
         gloc.append(i*tx)
         i += 1
@@ -133,11 +133,11 @@ def main():
 
         world.blit(backdrop, backdropbox)
         player.gravity(ty)
-        player.update(enemy_list)
+        player.update(enemy_list, ground_list, tx, ty)
         for enemy in enemy_list:
             enemy.move()
             enemy.gravity(ty)
-            enemy.update(player_list)
+            enemy.update(player_list, ground_list, plat_list)
 
         ground_list.draw(world)
         plat_list.draw(world)
