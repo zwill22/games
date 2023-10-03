@@ -76,6 +76,7 @@ class Player(pygame.sprite.Sprite):
         """
 
         if self.movex < 0 or self.movex > 0:
+            self.is_jumping = True
             self.frame += 1
             if self.frame > 3 * ani:
                 self.frame = 0
