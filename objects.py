@@ -18,7 +18,7 @@
 import pygame
 import os
 
-from variables import ani
+from variables import ani, worldy
 
 
 class Player(pygame.sprite.Sprite):
@@ -43,6 +43,13 @@ class Player(pygame.sprite.Sprite):
             self.images.append(img)
         self.image = self.images[0]
         self.rect = self.image.get_rect()
+
+    def gravity(self, ty):
+        self.movey += 2
+
+        if self.rect.y > worldy and self.movey >= 0:
+            self.movey = 0
+            self.rect.y = worldy - ty - ty
 
     def control(self, x, y):
         """

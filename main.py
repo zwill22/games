@@ -132,6 +132,7 @@ def main():
                     player.stop()
 
         world.blit(backdrop, backdropbox)
+        player.gravity(ty)
         player.update(enemy_list)
         for enemy in enemy_list:
             enemy.move()
