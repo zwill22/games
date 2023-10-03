@@ -58,6 +58,11 @@ class Player(pygame.sprite.Sprite):
         self.movex += x
         self.movey += y
 
+    def jump(self):
+        if not self.is_jumping:
+            self.is_falling = False
+            self.is_jumping = True
+
     def stop(self):
         """
         Stop player movement
@@ -65,12 +70,10 @@ class Player(pygame.sprite.Sprite):
         self.movex = 0
         self.movey = 0
 
-    def update(self, enemy_list, ground_list, tx, ty):
+    def update(self, enemy_list, ground_list, plat_list, tx, ty):
         """
         Update sprite position
         """
-        self.rect.x += self.movex
-        self.rect.y += self.movey
 
         if self.movex < 0 or self.movex > 0:
             self.frame += 1
@@ -97,12 +100,31 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = g.rect.top
             self.is_jumping = False
 
+        plat_hit_list = pygame.sprite.spritecollide(
+            self, plat_list, False)
+        for p in plat_hit_list:
+            self.is_jumping = False
+            self.movey = 0
+
+            # approach from below
+            if self.rect.bottom < p.rect.bottom:
+                self.rect.bottom = p.rect.top
+            else:
+                self.movey += 2
+
         # Fall off the world
         if self.rect.y > worldy:
             self.health -= 1
             print(self.health)
             self.rect.x = tx
             self.rect.y = ty
+
+        if self.is_jumping and not self.is_falling:
+            self.is_falling = True
+            self.movey -= 24
+
+        self.rect.x += self.movex
+        self.rect.y += self.movey
 
 
 class Enemy(pygame.sprite.Sprite):

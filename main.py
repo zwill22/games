@@ -92,8 +92,7 @@ def main():
                             pygame.mouse.set_visible(True)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    # TODO Program for one button only
-                    print("jump")
+                    player.jump()
 
             elif input_type == "keyboard":
                 if event.type == pygame.KEYDOWN:
@@ -101,8 +100,9 @@ def main():
                         player.control(-steps, 0)
                     if event.key == pygame.K_RIGHT or event.key == ord('d'):
                         player.control(steps, 0)
-                    if event.key == pygame.K_UP or event.key == ord('w'):
-                        print('jump')
+                    if (event.key == pygame.K_UP or event.key == ord('w')
+                            or event.key == pygame.K_SPACE):
+                        player.jump()
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -128,12 +128,13 @@ def main():
                         input_type = "keyboard"
                         pygame.mouse.set_visible(True)
                     else:
-                        raise ValueError("Invalid input type: {}".format(input_type))
+                        raise ValueError(
+                            "Invalid input type: {}".format(input_type))
                     player.stop()
 
         world.blit(backdrop, backdropbox)
         player.gravity(ty)
-        player.update(enemy_list, ground_list, tx, ty)
+        player.update(enemy_list, ground_list, plat_list, tx, ty)
         for enemy in enemy_list:
             enemy.move()
             enemy.gravity(ty)
