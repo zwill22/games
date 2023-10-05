@@ -59,6 +59,8 @@ def main():
             plat_list.sprites()[1].rect.y - ty]
     enemy_list = level.bad(1, eloc)
 
+    loot_list = level.loot(1, tx, ty)
+
     input_type = "keyboard"
 
     """
@@ -72,10 +74,7 @@ def main():
 
             if event.type == pygame.QUIT:
                 pygame.quit()
-                try:
-                    sys.exit()
-                finally:
-                    go = False
+                return 0
 
             if input_type == "mouse":
                 if event.type == pygame.MOUSEMOTION:
@@ -115,10 +114,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == ord('q'):
                     pygame.quit()
-                    try:
-                        sys.exit()
-                    finally:
-                        go = False
+                    return 0
                 if event.key == ord('i'):
                     if input_type == "keyboard":
                         input_type = "mouse"
@@ -139,6 +135,8 @@ def main():
                 p.rect.x -= scroll
             for e in enemy_list:
                 e.rect.x -= scroll
+            for l in loot_list:
+                l.rect.x -= scroll
 
         if player.rect.x <= backwardx:
             scroll = backwardx - player.rect.x
@@ -147,9 +145,13 @@ def main():
                 p.rect.x += scroll
             for e in enemy_list:
                 e.rect.x += scroll
+            for l in loot_list:
+                l.rect.x += scroll
+
+        # TODO Implement vertical scroll -- take care of jump in
 
         world.blit(backdrop, backdropbox)
-        player.update(enemy_list, ground_list, plat_list, tx, ty)
+        player.update(enemy_list, ground_list, plat_list, loot_list, tx, ty)
         player.gravity(ty)
 
         ground_list.draw(world)
@@ -161,6 +163,8 @@ def main():
             enemy.move()
             enemy.gravity(ty)
             enemy.update(player_list, ground_list, plat_list)
+
+        loot_list.draw(world)
 
         pygame.display.flip()
         clock.tick(fps)

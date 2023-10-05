@@ -32,6 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.movey = 0
         self.frame = 0
         self.health = 10
+        self.score = 0
 
         self.is_jumping = True
         self.is_falling = False
@@ -70,7 +71,7 @@ class Player(pygame.sprite.Sprite):
         self.movex = 0
         self.movey = 0
 
-    def update(self, enemy_list, ground_list, plat_list, tx, ty):
+    def update(self, enemy_list, ground_list, plat_list, loot_list, tx, ty):
         """
         Update sprite position
         """
@@ -101,6 +102,13 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = g.rect.top
             self.is_jumping = False
 
+        loot_hit_list = pygame.sprite.spritecollide(
+            self, loot_list, False)
+        for loot in loot_hit_list:
+            loot_list.remove(loot)
+            self.score += 1
+            print("Score: {}".format(self.score))
+
         plat_hit_list = pygame.sprite.spritecollide(
             self, plat_list, False)
         for p in plat_hit_list:
@@ -116,7 +124,7 @@ class Player(pygame.sprite.Sprite):
         # Fall off the world
         if self.rect.y > worldy:
             self.health -= 1
-            print(self.health)
+            print("Player health: {}".format(self.health))
             self.rect.x = tx
             self.rect.y = ty
 
@@ -209,7 +217,7 @@ class Enemy(pygame.sprite.Sprite):
 
         for ob_list in (ground_list, plat_list):
             ground_hit_list = pygame.sprite.spritecollide(
-            self, ob_list, False)
+                self, ob_list, False)
             for g in ground_hit_list:
                 self.movey = 0
                 self.rect.bottom = g.rect.top
@@ -218,7 +226,7 @@ class Enemy(pygame.sprite.Sprite):
 
 class Platform(pygame.sprite.Sprite):
 
-    def __init__(self, xloc, yloc, imgw, imgh, img):
+    def __init__(self, xloc, yloc, img):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join('images', img)).convert()
         self.image.convert_alpha()

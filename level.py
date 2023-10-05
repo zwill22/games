@@ -40,7 +40,7 @@ def ground(lvl, gloc, tx, ty):
     i = 0
     if lvl == 1:
         for g in gloc:
-            gr = Platform(g, worldy - ty, tx, ty, 'tile-ground.png')
+            gr = Platform(g, worldy - ty, 'tile-ground.png')
             ground_list.add(gr)
     else:
         invalid_level()
@@ -71,12 +71,23 @@ def platform(lvl, tx, ty):
         ploc.append((500, worldy-ty-128, 4))
         for pl in ploc:
             for j in range(pl[2] + 1):
-                plat = Platform((pl[0]+(j*tx)), pl[1], tx, ty, 'tile.png')
+                plat = Platform((pl[0]+(j*tx)), pl[1], 'tile.png')
                 plat_list.add(plat)
     else:
         invalid_level(lvl)
 
     return plat_list
+
+
+def loot(lvl, tx, ty):
+    loot_list = pygame.sprite.Group()
+    if lvl == 1:
+        lot = Platform(tx*8, ty*7.5, 'loot_1.png')
+        loot_list.add(lot)
+    else:
+        invalid_level(lvl)
+
+    return loot_list
 
 
 def bad(lvl, eloc):
