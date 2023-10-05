@@ -19,7 +19,7 @@ import pygame
 import sys
 
 import level
-from variables import worldx, worldy, fps
+from variables import worldx, worldy, fps, forwardx, backwardx
 from objects import Player
 
 
@@ -132,18 +132,35 @@ def main():
                             "Invalid input type: {}".format(input_type))
                     player.stop()
 
+        if player.rect.x >= forwardx:
+            scroll = player.rect.x - forwardx
+            player.rect.x = forwardx
+            for p in plat_list:
+                p.rect.x -= scroll
+            for e in enemy_list:
+                e.rect.x -= scroll
+
+        if player.rect.x <= backwardx:
+            scroll = backwardx - player.rect.x
+            player.rect.x = backwardx
+            for p in plat_list:
+                p.rect.x += scroll
+            for e in enemy_list:
+                e.rect.x += scroll
+
         world.blit(backdrop, backdropbox)
-        player.gravity(ty)
         player.update(enemy_list, ground_list, plat_list, tx, ty)
-        for enemy in enemy_list:
-            enemy.move()
-            enemy.gravity(ty)
-            enemy.update(player_list, ground_list, plat_list)
+        player.gravity(ty)
 
         ground_list.draw(world)
         plat_list.draw(world)
         player_list.draw(world)
+
         enemy_list.draw(world)
+        for enemy in enemy_list:
+            enemy.move()
+            enemy.gravity(ty)
+            enemy.update(player_list, ground_list, plat_list)
 
         pygame.display.flip()
         clock.tick(fps)
