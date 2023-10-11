@@ -16,11 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pygame
-import sys
 
 import level
 from variables import worldx, worldy, fps, forwardx, backwardx
-from objects import Player
+from objects import Player, Throwable
 
 
 def main():
@@ -51,6 +50,10 @@ def main():
     player_list = pygame.sprite.Group()
     player_list.add(player)
     steps = 10
+
+    fire = Throwable(player.rect.x, player.rect.y, 'fire.png', False,
+                     True)
+    firepower = pygame.sprite.Group()
 
     ground_list = level.ground(1, gloc, tx, ty)
     plat_list = level.platform(1, tx, ty)
@@ -97,11 +100,18 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT or event.key == ord('a'):
                         player.control(-steps, 0)
+                        player.facing_right = False
                     if event.key == pygame.K_RIGHT or event.key == ord('d'):
                         player.control(steps, 0)
-                    if (event.key == pygame.K_UP or event.key == ord('w')
-                            or event.key == pygame.K_SPACE):
+                        player.facing_right = True
+                    if event.key == pygame.K_UP or event.key == ord('w'):
                         player.jump()
+                    if event.key == pygame.K_SPACE:
+                        if not fire.firing:
+                            fire = Throwable(
+                                player.rect.x, player.rect.y, 'fire.png',
+                                True, player.facing_right)
+                            firepower.add(fire)
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -158,11 +168,16 @@ def main():
         plat_list.draw(world)
         player_list.draw(world)
 
+        if fire.firing:
+            fire.update()
+            firepower.draw(world)
+
         enemy_list.draw(world)
         for enemy in enemy_list:
             enemy.move()
             enemy.gravity(ty)
-            enemy.update(player_list, ground_list, plat_list)
+            enemy.update(player_list, enemy_list, ground_list, plat_list,
+                         firepower)
 
         loot_list.draw(world)
 

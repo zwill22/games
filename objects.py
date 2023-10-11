@@ -18,7 +18,7 @@
 import pygame
 import os
 
-from variables import ani, worldy
+from variables import ani, worldy, worldx
 
 
 class Player(pygame.sprite.Sprite):
@@ -33,6 +33,8 @@ class Player(pygame.sprite.Sprite):
         self.frame = 0
         self.health = 10
         self.score = 0
+
+        self.facing_right = True
 
         self.is_jumping = True
         self.is_falling = False
@@ -196,9 +198,9 @@ class Enemy(pygame.sprite.Sprite):
             self.movey = 0
             self.rect.y = worldy - ty - ty
 
-    def update(self, player_list, ground_list, plat_list):
+    def update(self, player_list, enemy_list, ground_list, plat_list, firepower):
         """
-        Update sprite position
+        Update sprite position and detect collisions
         """
         self.frame += 1
         if self.frame > 3 * ani:
@@ -215,6 +217,10 @@ class Enemy(pygame.sprite.Sprite):
         for player in hit_list:
             self.health -= 1
 
+        fire_hit_list = pygame.sprite.spritecollide(self, firepower, False)
+        for fire in fire_hit_list:
+            enemy_list.remove(self)
+
         for ob_list in (ground_list, plat_list):
             ground_hit_list = pygame.sprite.spritecollide(
                 self, ob_list, False)
@@ -222,6 +228,39 @@ class Enemy(pygame.sprite.Sprite):
                 self.movey = 0
                 self.rect.bottom = g.rect.top
                 self.is_falling = False
+
+
+class Throwable(pygame.sprite.Sprite):
+    """
+    Spawn a throwable object
+    """
+    def __init__(self, x, y, img, throw, forward):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load(os.path.join('images', img))
+        self.image.convert_alpha()
+        self.image.set_colorkey(0)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        self.firing = throw
+        self.forward = forward
+
+    def update(self):
+        """
+        Throw physics
+        """
+        if 0 < self.rect.y < worldy and 0 < self.rect.x < worldx:
+            if self.forward:
+                self.rect.x += 15
+            else:
+                self.rect.x -= 15
+            self.rect.y += 0
+        else:
+            self.kill()
+            self.firing = False
 
 
 class Platform(pygame.sprite.Sprite):
