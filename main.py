@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # by Zack M. Williams
+import os.path
 
 # # GPLv3
 # This program is free software: you can redistribute it and/or
@@ -16,10 +17,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pygame
+import pygame.freetype
 
 import level
 from variables import worldx, worldy, fps, forwardx, backwardx
 from objects import Player, Throwable
+
+
+def stats(world, font: pygame.freetype.Font, score: int, health: int):
+    """
+    Display the current score and health of the player
+
+    :param world: Game world in which to render stats
+    :param font: Font for rendering stats
+    :param score: Current score
+    :param health: Current health
+    """
+    font.render_to(world, (4, 4), "Score: {}".format(score),
+                   (23, 23, 23),None, size=64)
+    font.render_to(world, (4, 72), "Health: {}".format(health),
+                   (23, 23, 23), None, size=64)
 
 
 def main():
@@ -65,6 +82,12 @@ def main():
     loot_list = level.loot(1, tx, ty)
 
     input_type = "keyboard"
+
+    font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             "fonts", "Clickuper.ttf")
+    fontsize = tx
+    pygame.freetype.init()
+    my_font = pygame.freetype.Font(font_path, size=fontsize)
 
     """
     Main Loop
@@ -180,6 +203,8 @@ def main():
                          firepower)
 
         loot_list.draw(world)
+
+        stats(world, my_font, player.score, player.health)
 
         pygame.display.flip()
         clock.tick(fps)

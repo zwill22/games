@@ -32,6 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.movey = 0
         self.frame = 0
         self.health = 10
+        self.damage = 0
         self.score = 0
 
         self.facing_right = True
@@ -92,10 +93,17 @@ class Player(pygame.sprite.Sprite):
         if self.movex > 0:
             self.image = self.images[self.frame//ani]
 
-        hit_list = pygame.sprite.spritecollide(self, enemy_list, False)
-        for enemy in hit_list:
-            self.health -= 1
-            print("Player health: {}".format(self.health))
+        enemy_hit_list = pygame.sprite.spritecollide(self, enemy_list,
+                                                     False)
+        if self.damage == 0:
+            for enemy in enemy_list:
+                if not self.rect.contains(enemy):
+                    self.damage = self.rect.colliderect(enemy)
+        if self.damage == 1:
+            idx = self.rect.collidelist(enemy_hit_list)
+            if idx == -1:
+                self.damage = 0
+                self.health -= 1
 
         ground_hit_list = pygame.sprite.spritecollide(
             self, ground_list, False)
