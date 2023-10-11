@@ -117,7 +117,6 @@ class Player(pygame.sprite.Sprite):
         for loot in loot_hit_list:
             loot_list.remove(loot)
             self.score += 1
-            print("Score: {}".format(self.score))
 
         plat_hit_list = pygame.sprite.spritecollide(
             self, plat_list, False)
@@ -134,7 +133,6 @@ class Player(pygame.sprite.Sprite):
         # Fall off the world
         if self.rect.y > worldy:
             self.health -= 1
-            print("Player health: {}".format(self.health))
             self.rect.x = tx
             self.rect.y = ty
 
