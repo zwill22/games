@@ -23,6 +23,39 @@ import level
 from variables import worldx, worldy, fps, forwardx, backwardx
 from objects import Player, Throwable
 
+"""
+TODO list
+- animate fireballs
+- animate loot
+- health loot
+- throwable items disintegrate on collision with platforms
+- animate destruction of objects
+- level goal
+- more platforms
+- More enemies
+- PS4 controller
+- App?
+- Menus
+- Settings file
+- Move global variables to settings file
+- Vertical movement
+- Edge of maps
+- Levels
+- More consistent theme
+
+- Cutscenes?
+- Plot?
+
+- Reorganise files
+
+- death by jumping?
+- Double jump?
+- Bouncy objects?
+
+- Hills?
+- More scenery (scrolling)
+"""
+
 
 def stats(world, font: pygame.freetype.Font, score: int, health: int):
     """
