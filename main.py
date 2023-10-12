@@ -116,11 +116,19 @@ def main():
 
     input_type = "keyboard"
 
+    # Font setup
     font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "fonts", "Clickuper.ttf")
     fontsize = tx
     pygame.freetype.init()
     my_font = pygame.freetype.Font(font_path, size=fontsize)
+
+    # Sounds
+    pygame.mixer.init()
+    pygame.mixer.music.load(os.path.join('sound', 'ObservingTheStar.ogg'))
+    pygame.mixer.music.play(-1)
+
+    flame = pygame.mixer.Sound(os.path.join('sound', 'flame.ogg'))
 
     """
     Main Loop
@@ -167,6 +175,7 @@ def main():
                             fire = Throwable(
                                 player.rect.x, player.rect.y, 'fire.png',
                                 True, player.facing_right)
+                            pygame.mixer.Sound.play(flame)
                             firepower.add(fire)
 
                 if event.type == pygame.KEYUP:

@@ -174,6 +174,9 @@ class Enemy(pygame.sprite.Sprite):
         self.forward = True
         self.health = 1
 
+        self.burn = pygame.mixer.Sound(
+            os.path.join('sound', 'fire_sound_effect.mp3'))
+
     def move(self):
         """
         Enemy movement
@@ -225,7 +228,9 @@ class Enemy(pygame.sprite.Sprite):
 
         fire_hit_list = pygame.sprite.spritecollide(self, firepower, False)
         for fire in fire_hit_list:
+            # TODO Add death animation
             enemy_list.remove(self)
+            self.burn.play(1, 150)
 
         for ob_list in (ground_list, plat_list):
             ground_hit_list = pygame.sprite.spritecollide(
