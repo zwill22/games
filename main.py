@@ -57,6 +57,22 @@ TODO list
 """
 
 
+class World:
+    def __init__(self):
+        self.world = pygame.display.set_mode([worldx, worldy])
+        self.backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
+
+        # Player setup
+        player = Player()
+        player.rect.x = 0
+        player.rect.y = 0
+        self.player = player
+
+    def update(self):
+        backdropbox = self.world.get_rect()
+        self.world.blit(self.backdrop, backdropbox)
+
+
 def stats(world, font: pygame.freetype.Font, score: int, health: int):
     """
     Display the current score and health of the player
@@ -73,7 +89,11 @@ def stats(world, font: pygame.freetype.Font, score: int, health: int):
 
 
 def main():
-    go = True
+
+    tx = 64
+    ty = 64
+    steps = 10
+    input_type = "keyboard"
 
     """
     Setup
@@ -81,40 +101,32 @@ def main():
     clock = pygame.time.Clock()
     pygame.init()
 
-    world = pygame.display.set_mode([worldx, worldy])
-    backdrop = pygame.image.load('images/stage.png')
-    backdropbox = world.get_rect()
+    world_setup = World()
 
+    player = world_setup.player
+
+    # Firepower setup
+    fire = Throwable(player.rect.x, player.rect.y, 'fire.png', False,
+                     True)
+    firepower = pygame.sprite.Group()
+
+    # Platform/Ground setup
     gloc = []
-    tx = 64
-    ty = 64
 
     i = 0
     while i < (worldx/tx)+tx:
         gloc.append(i*tx)
         i += 1
 
-    player = Player()
-    player.rect.x = 0
-    player.rect.y = 0
-    player_list = pygame.sprite.Group()
-    player_list.add(player)
-    steps = 10
-
-    fire = Throwable(player.rect.x, player.rect.y, 'fire.png', False,
-                     True)
-    firepower = pygame.sprite.Group()
-
     ground_list = level.ground(1, gloc, tx, ty)
     plat_list = level.platform(1, tx, ty)
 
+    # Enemy and loot setup
     eloc = [plat_list.sprites()[1].rect.x,
             plat_list.sprites()[1].rect.y - ty]
     enemy_list = level.bad(1, eloc)
 
     loot_list = level.loot(1, tx, ty)
-
-    input_type = "keyboard"
 
     # Font setup
     font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -134,7 +146,7 @@ def main():
     Main Loop
     """
 
-    while go:
+    while True:
         pygame.mouse.get_rel()
 
         for event in pygame.event.get():
@@ -225,13 +237,16 @@ def main():
 
         # TODO Implement vertical scroll -- take care of jump in
 
-        world.blit(backdrop, backdropbox)
         player.update(enemy_list, ground_list, plat_list, loot_list, tx, ty)
         player.gravity(ty)
 
+        world = world_setup.world
+
+        world_setup.update()
+
         ground_list.draw(world)
         plat_list.draw(world)
-        player_list.draw(world)
+        player.draw(world)
 
         if fire.firing:
             fire.update()
@@ -241,8 +256,7 @@ def main():
         for enemy in enemy_list:
             enemy.move()
             enemy.gravity(ty)
-            enemy.update(player_list, enemy_list, ground_list, plat_list,
-                         firepower)
+            enemy.update(player, enemy_list, ground_list, plat_list, firepower)
 
         loot_list.draw(world)
 
@@ -250,8 +264,6 @@ def main():
 
         pygame.display.flip()
         clock.tick(fps)
-
-    return 0
 
 
 if __name__ == '__main__':

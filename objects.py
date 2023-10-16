@@ -21,18 +21,26 @@ import os
 from variables import ani, worldy, worldx
 
 
-class Player(pygame.sprite.Sprite):
+class Sprite(pygame.sprite.Sprite):
+    """
+    Generic sprite class based on pygames Sprite
+    """
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+
+class Player(Sprite):
     """
     Spawn a player
     """
 
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
         self.movex = 0
         self.movey = 0
         self.frame = 0
         self.health = 10
-        self.damage = 0
+        self.damage = False
         self.score = 0
 
         self.facing_right = True
@@ -50,6 +58,11 @@ class Player(pygame.sprite.Sprite):
             self.images.append(img)
         self.image = self.images[0]
         self.rect = self.image.get_rect()
+
+    def draw(self, world):
+        player_list = pygame.sprite.Group()
+        player_list.add(self)
+        player_list.draw(world)
 
     def gravity(self, ty):
         if self.is_jumping:
@@ -74,6 +87,9 @@ class Player(pygame.sprite.Sprite):
         self.movex = 0
         self.movey = 0
 
+    def hit_list(self, ob_list):
+        return pygame.sprite.spritecollide(self, ob_list, False)
+
     def update(self, enemy_list, ground_list, plat_list, loot_list, tx, ty):
         """
         Update sprite position
@@ -93,33 +109,29 @@ class Player(pygame.sprite.Sprite):
         if self.movex > 0:
             self.image = self.images[self.frame//ani]
 
-        enemy_hit_list = pygame.sprite.spritecollide(self, enemy_list,
-                                                     False)
-        if self.damage == 0:
+        enemy_hit_list = self.hit_list(enemy_list)
+        if not self.damage:
             for enemy in enemy_list:
                 if not self.rect.contains(enemy):
                     self.damage = self.rect.colliderect(enemy)
-        if self.damage == 1:
+        if self.damage:
             idx = self.rect.collidelist(enemy_hit_list)
             if idx == -1:
                 self.damage = 0
                 self.health -= 1
 
-        ground_hit_list = pygame.sprite.spritecollide(
-            self, ground_list, False)
+        ground_hit_list = self.hit_list(ground_list)
         for g in ground_hit_list:
             self.movey = 0
             self.rect.bottom = g.rect.top
             self.is_jumping = False
 
-        loot_hit_list = pygame.sprite.spritecollide(
-            self, loot_list, False)
+        loot_hit_list = self.hit_list(loot_list)
         for loot in loot_hit_list:
             loot_list.remove(loot)
             self.score += 1
 
-        plat_hit_list = pygame.sprite.spritecollide(
-            self, plat_list, False)
+        plat_hit_list = self.hit_list(plat_list)
         for p in plat_hit_list:
             self.is_jumping = False
             self.movey = 0
@@ -144,12 +156,12 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += self.movey
 
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(Sprite):
     """
     Spawn an enemy
     """
     def __init__(self, x, y, img):
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
 
         self.images = []
         for i in range(4):
@@ -181,6 +193,7 @@ class Enemy(pygame.sprite.Sprite):
         """
         Enemy movement
         """
+        # TODO Remove magic numbers
         distance = 30
         speed = 4
 
@@ -207,7 +220,11 @@ class Enemy(pygame.sprite.Sprite):
             self.movey = 0
             self.rect.y = worldy - ty - ty
 
-    def update(self, player_list, enemy_list, ground_list, plat_list, firepower):
+    def hit(self, player: Player) -> bool:
+        return player.rect.colliderect(self.rect)
+
+    def update(self, player: Player, enemy_list, ground_list, plat_list,
+               firepower):
         """
         Update sprite position and detect collisions
         """
@@ -222,8 +239,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.images[self.frame//ani], True, False
             )
 
-        hit_list = pygame.sprite.spritecollide(self, player_list, False)
-        for player in hit_list:
+        if self.hit(player):
             self.health -= 1
 
         fire_hit_list = pygame.sprite.spritecollide(self, firepower, False)
@@ -241,12 +257,12 @@ class Enemy(pygame.sprite.Sprite):
                 self.is_falling = False
 
 
-class Throwable(pygame.sprite.Sprite):
+class Throwable(Sprite):
     """
     Spawn a throwable object
     """
     def __init__(self, x, y, img, throw, forward):
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
 
         self.image = pygame.image.load(os.path.join('images', img))
         self.image.convert_alpha()
@@ -274,10 +290,10 @@ class Throwable(pygame.sprite.Sprite):
             self.firing = False
 
 
-class Platform(pygame.sprite.Sprite):
+class Platform(Sprite):
 
     def __init__(self, xloc, yloc, img):
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join('images', img)).convert()
         self.image.convert_alpha()
         self.image.set_colorkey(0)
