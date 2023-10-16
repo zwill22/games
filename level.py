@@ -94,7 +94,9 @@ def bad(lvl, eloc):
     enemy_list = pygame.sprite.Group()
 
     if lvl == 1:
-        enemy = Enemy(eloc[0], eloc[1], 'enemy')
+        images = ["enemy-{}.png".format(i) for i in range(4)]
+
+        enemy = Enemy(eloc[0], eloc[1], *images)
         enemy_list.add(enemy)
     else:
         invalid_level(lvl)

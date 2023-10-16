@@ -78,14 +78,11 @@ class World:
         self.backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
 
         # Player setup
-        player = Player()
-        player.rect.x = 0
-        player.rect.y = 0
-        self.player = player
+        self.player = Player(0, 0)
 
         # Firepower setup
-        self.fire = Throwable(player.rect.x, player.rect.y, 'fire.png',
-                              False, True)
+        self.fire = Throwable(self.player.rect.x, self.player.rect.y,
+                              'fire.png')
         self.firepower = pygame.sprite.Group()
 
         # Platform/Ground setup
@@ -126,7 +123,7 @@ class World:
         if not self.fire.firing:
             self.fire = Throwable(
                 self.player.rect.x, self.player.rect.y, 'fire.png',
-                True, self.player.facing_right)
+                throw=True, forward=self.player.facing_right)
             pygame.mixer.Sound.play(flame)
             self.firepower.add(self.fire)
 
