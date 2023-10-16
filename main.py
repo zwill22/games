@@ -57,6 +57,21 @@ TODO list
 """
 
 
+def stats(world, font: pygame.freetype.Font, score: int, health: int):
+    """
+    Display the current score and health of the player
+
+    :param world: Game world in which to render stats
+    :param font: Font for rendering stats
+    :param score: Current score
+    :param health: Current health
+    """
+    font.render_to(world, (4, 4), "Score: {}".format(score),
+                   (23, 23, 23),None, size=64)
+    font.render_to(world, (4, 72), "Health: {}".format(health),
+                   (23, 23, 23), None, size=64)
+
+
 class World:
     def __init__(self, tx, ty):
         self.world = pygame.display.set_mode([worldx, worldy])
@@ -91,6 +106,22 @@ class World:
 
         self.loot_list = level.loot(1, tx, ty)
 
+    def scroll(self, fx, bx):
+        # TODO Implement vertical scroll -- take care of jump in
+        if self.player.rect.x >= fx:
+            scroll = self.player.rect.x - fx
+            self.player.rect.x = fx
+            for ob_list in (self.plat_list, self.enemy_list, self.loot_list):
+                for ob in ob_list:
+                    ob.rect.x -= scroll
+
+        if self.player.rect.x <= bx:
+            scroll = bx - self.player.rect.x
+            self.player.rect.x = bx
+            for ob_list in (self.plat_list, self.enemy_list, self.loot_list):
+                for ob in ob_list:
+                    ob.rect.x += scroll
+
     def fireball(self, flame):
         if not self.fire.firing:
             self.fire = Throwable(
@@ -121,19 +152,8 @@ class World:
             enemy.update(self.player, self.enemy_list, self.ground_list,
                          self.plat_list, self.firepower)
 
-def stats(world, font: pygame.freetype.Font, score: int, health: int):
-    """
-    Display the current score and health of the player
-
-    :param world: Game world in which to render stats
-    :param font: Font for rendering stats
-    :param score: Current score
-    :param health: Current health
-    """
-    font.render_to(world, (4, 4), "Score: {}".format(score),
-                   (23, 23, 23),None, size=64)
-    font.render_to(world, (4, 72), "Health: {}".format(health),
-                   (23, 23, 23), None, size=64)
+    def stats(self, font):
+        stats(self.world, font, self.player.score, self.player.health)
 
 
 def main():
@@ -149,15 +169,9 @@ def main():
     clock = pygame.time.Clock()
     pygame.init()
 
-    world_setup = World(tx, ty)
+    world = World(tx, ty)
 
-    player = world_setup.player
-
-    plat_list = world_setup.plat_list
-    enemy_list = world_setup.enemy_list
-    loot_list = world_setup.loot_list
-
-    ground_list = world_setup.ground_list
+    player = world.player
 
     # Font setup
     font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -214,7 +228,7 @@ def main():
                     if event.key == pygame.K_UP or event.key == ord('w'):
                         player.jump()
                     if event.key == pygame.K_SPACE:
-                        world_setup.fireball(flame)
+                        world.fireball(flame)
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -241,31 +255,10 @@ def main():
                             "Invalid input type: {}".format(input_type))
                     player.stop()
 
-        if player.rect.x >= forwardx:
-            scroll = player.rect.x - forwardx
-            player.rect.x = forwardx
-            for p in plat_list:
-                p.rect.x -= scroll
-            for e in enemy_list:
-                e.rect.x -= scroll
-            for l in loot_list:
-                l.rect.x -= scroll
+        world.scroll(forwardx, backwardx)
 
-        if player.rect.x <= backwardx:
-            scroll = backwardx - player.rect.x
-            player.rect.x = backwardx
-            for p in plat_list:
-                p.rect.x += scroll
-            for e in enemy_list:
-                e.rect.x += scroll
-            for l in loot_list:
-                l.rect.x += scroll
-
-        # TODO Implement vertical scroll -- take care of jump in
-
-        world_setup.update(tx, ty)
-
-        stats(world_setup.world, my_font, player.score, player.health)
+        world.update(tx, ty)
+        world.stats(my_font)
 
         pygame.display.flip()
         clock.tick(fps)
