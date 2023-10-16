@@ -58,7 +58,7 @@ TODO list
 
 
 class World:
-    def __init__(self):
+    def __init__(self, tx, ty):
         self.world = pygame.display.set_mode([worldx, worldy])
         self.backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
 
@@ -68,10 +68,58 @@ class World:
         player.rect.y = 0
         self.player = player
 
-    def update(self):
+        # Firepower setup
+        self.fire = Throwable(player.rect.x, player.rect.y, 'fire.png',
+                              False, True)
+        self.firepower = pygame.sprite.Group()
+
+        # Platform/Ground setup
+        gloc = []
+
+        i = 0
+        while i < (worldx / tx) + tx:
+            gloc.append(i * tx)
+            i += 1
+
+        self.ground_list = level.ground(1, gloc, tx, ty)
+        self.plat_list = level.platform(1, tx, ty)
+
+        # Enemy and loot setup
+        eloc = [self.plat_list.sprites()[1].rect.x,
+                self.plat_list.sprites()[1].rect.y - ty]
+        self.enemy_list = level.bad(1, eloc)
+
+        self.loot_list = level.loot(1, tx, ty)
+
+    def fireball(self, flame):
+        if not self.fire.firing:
+            self.fire = Throwable(
+                self.player.rect.x, self.player.rect.y, 'fire.png',
+                True, self.player.facing_right)
+            pygame.mixer.Sound.play(flame)
+            self.firepower.add(self.fire)
+
+    def update(self, tx, ty):
         backdropbox = self.world.get_rect()
         self.world.blit(self.backdrop, backdropbox)
 
+        self.player.update(self.enemy_list, self.ground_list, self.plat_list,
+                           self.loot_list, tx, ty)
+        self.player.gravity(ty)
+
+        for ob_list in (self.ground_list, self.plat_list, self.player,
+                        self.enemy_list, self.loot_list):
+            ob_list.draw(self.world)
+
+        if self.fire.firing:
+            self.fire.update()
+            self.firepower.draw(self.world)
+
+        for enemy in self.enemy_list:
+            enemy.move()
+            enemy.gravity(ty)
+            enemy.update(self.player, self.enemy_list, self.ground_list,
+                         self.plat_list, self.firepower)
 
 def stats(world, font: pygame.freetype.Font, score: int, health: int):
     """
@@ -101,32 +149,15 @@ def main():
     clock = pygame.time.Clock()
     pygame.init()
 
-    world_setup = World()
+    world_setup = World(tx, ty)
 
     player = world_setup.player
 
-    # Firepower setup
-    fire = Throwable(player.rect.x, player.rect.y, 'fire.png', False,
-                     True)
-    firepower = pygame.sprite.Group()
+    plat_list = world_setup.plat_list
+    enemy_list = world_setup.enemy_list
+    loot_list = world_setup.loot_list
 
-    # Platform/Ground setup
-    gloc = []
-
-    i = 0
-    while i < (worldx/tx)+tx:
-        gloc.append(i*tx)
-        i += 1
-
-    ground_list = level.ground(1, gloc, tx, ty)
-    plat_list = level.platform(1, tx, ty)
-
-    # Enemy and loot setup
-    eloc = [plat_list.sprites()[1].rect.x,
-            plat_list.sprites()[1].rect.y - ty]
-    enemy_list = level.bad(1, eloc)
-
-    loot_list = level.loot(1, tx, ty)
+    ground_list = world_setup.ground_list
 
     # Font setup
     font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -183,12 +214,7 @@ def main():
                     if event.key == pygame.K_UP or event.key == ord('w'):
                         player.jump()
                     if event.key == pygame.K_SPACE:
-                        if not fire.firing:
-                            fire = Throwable(
-                                player.rect.x, player.rect.y, 'fire.png',
-                                True, player.facing_right)
-                            pygame.mixer.Sound.play(flame)
-                            firepower.add(fire)
+                        world_setup.fireball(flame)
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -237,30 +263,9 @@ def main():
 
         # TODO Implement vertical scroll -- take care of jump in
 
-        player.update(enemy_list, ground_list, plat_list, loot_list, tx, ty)
-        player.gravity(ty)
+        world_setup.update(tx, ty)
 
-        world = world_setup.world
-
-        world_setup.update()
-
-        ground_list.draw(world)
-        plat_list.draw(world)
-        player.draw(world)
-
-        if fire.firing:
-            fire.update()
-            firepower.draw(world)
-
-        enemy_list.draw(world)
-        for enemy in enemy_list:
-            enemy.move()
-            enemy.gravity(ty)
-            enemy.update(player, enemy_list, ground_list, plat_list, firepower)
-
-        loot_list.draw(world)
-
-        stats(world, my_font, player.score, player.health)
+        stats(world_setup.world, my_font, player.score, player.health)
 
         pygame.display.flip()
         clock.tick(fps)
