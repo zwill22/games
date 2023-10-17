@@ -19,7 +19,7 @@ import os.path
 import pygame.freetype
 
 import level
-from variables import worldx, worldy, fps, forwardx, backwardx
+from variables import worldx, worldy, fps
 from objects import Player, Throwable
 from code.engine import SpriteList
 
@@ -86,7 +86,7 @@ class World:
         self.backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
 
         # Player setup
-        self.player = Player(0, 0)
+        self.player = Player(0, worldy/2)
 
         # Firepower setup
         self.fire, self.firepower = setup_firepower(self.player)
@@ -103,27 +103,43 @@ class World:
         self.plat_list = level.platform(1, tx, ty)
 
         # Enemy and loot setup
-        eloc = [self.plat_list.sprites()[1].rect.x,
+        enemy_loc = [self.plat_list.sprites()[1].rect.x,
                 self.plat_list.sprites()[1].rect.y - ty]
-        self.enemy_list = level.bad(1, eloc)
+        self.enemy_list = level.bad(1, enemy_loc)
 
         self.loot_list = level.loot(1, tx, ty)
 
-    def scroll(self, fx, bx):
-        # TODO Implement vertical scroll -- take care of jump in
+    def scroll_objects_x(self, fx, scroll):
+        self.player.rect.x = fx
+
+        for ob_list in (self.plat_list, self.enemy_list, self.loot_list):
+            for ob in ob_list:
+                ob.rect.x += scroll
+
+    def scroll_objects_y(self, fy, scroll):
+        self.player.rect.y = fy
+
+        for ob_list in (self.plat_list, self.enemy_list, self.loot_list,
+                        self.ground_list):
+            for ob in ob_list:
+                ob.rect.y += scroll
+
+    def scroll(self, bx, fx, by, fy):
         if self.player.rect.x >= fx:
             scroll = self.player.rect.x - fx
-            self.player.rect.x = fx
-            for ob_list in (self.plat_list, self.enemy_list, self.loot_list):
-                for ob in ob_list:
-                    ob.rect.x -= scroll
+            self.scroll_objects_x(fx, -scroll)
 
         if self.player.rect.x <= bx:
             scroll = bx - self.player.rect.x
-            self.player.rect.x = bx
-            for ob_list in (self.plat_list, self.enemy_list, self.loot_list):
-                for ob in ob_list:
-                    ob.rect.x += scroll
+            self.scroll_objects_x(bx, scroll)
+
+        if self.player.rect.y >= fy:
+            scroll = self.player.rect.y - fy
+            self.scroll_objects_y(fy, -scroll)
+
+        if self.player.rect.y <= by:
+            scroll = by - self.player.rect.y
+            self.scroll_objects_y(by, scroll)
 
     def fireball(self, flame):
         if not self.fire.firing:
@@ -164,6 +180,8 @@ def main():
     ty = 64
     steps = 10
     input_type = "keyboard"
+
+    edges = (0.3 * worldx, 0.7 * worldx, 0.17 * worldy, 0.83 * worldy)
 
     """
     Setup
@@ -257,7 +275,7 @@ def main():
                             "Invalid input type: {}".format(input_type))
                     player.stop()
 
-        world.scroll(forwardx, backwardx)
+        world.scroll(*edges)
 
         world.update(tx, ty)
         world.stats(my_font)

@@ -23,5 +23,3 @@ worldx = 960
 worldy = 720
 fps = 40
 ani = 4
-forwardx = 600
-backwardx = 230
