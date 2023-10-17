@@ -15,10 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import pygame
-
 from variables import worldy
 from objects import Platform, Enemy
+from code.engine import SpriteList
 
 
 def invalid_level(lvl):
@@ -35,15 +34,15 @@ def invalid_level(lvl):
     #     return ground_list
 
 
-def ground(lvl, gloc, tx, ty):
-    ground_list = pygame.sprite.Group()
+def ground(lvl, gloc, tx, ty) -> SpriteList:
+    ground_list = SpriteList()
     i = 0
     if lvl == 1:
         for g in gloc:
             gr = Platform(g, worldy - ty, 'tile-ground.png')
             ground_list.add(gr)
     else:
-        invalid_level()
+        invalid_level(lvl)
 
     return ground_list
 
@@ -62,8 +61,8 @@ def ground(lvl, gloc, tx, ty):
 #     return plat_list
 
 
-def platform(lvl, tx, ty):
-    plat_list = pygame.sprite.Group()
+def platform(lvl, tx, ty) -> SpriteList:
+    plat_list = SpriteList()
     ploc = []
     if lvl == 1:
         ploc.append((300, worldy-ty-256, 4))
@@ -79,8 +78,8 @@ def platform(lvl, tx, ty):
     return plat_list
 
 
-def loot(lvl, tx, ty):
-    loot_list = pygame.sprite.Group()
+def loot(lvl, tx, ty) -> SpriteList:
+    loot_list = SpriteList()
     if lvl == 1:
         lot = Platform(tx*8, ty*7.5, 'loot_1.png')
         loot_list.add(lot)
@@ -90,8 +89,8 @@ def loot(lvl, tx, ty):
     return loot_list
 
 
-def bad(lvl, eloc):
-    enemy_list = pygame.sprite.Group()
+def bad(lvl, eloc) -> SpriteList:
+    enemy_list = SpriteList()
 
     if lvl == 1:
         images = ["enemy-{}.png".format(i) for i in range(4)]

@@ -40,6 +40,8 @@ class Player(Sprite):
         self.is_jumping = True
         self.is_falling = False
 
+        self.facing_right = True
+
     def gravity(self):
         if self.is_jumping:
             self.movey += 2

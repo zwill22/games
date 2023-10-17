@@ -16,12 +16,12 @@ import os.path
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import pygame
 import pygame.freetype
 
 import level
 from variables import worldx, worldy, fps, forwardx, backwardx
 from objects import Player, Throwable
+from code.engine import SpriteList
 
 """
 TODO list
@@ -72,6 +72,14 @@ def stats(world, font: pygame.freetype.Font, score: int, health: int):
                    (23, 23, 23), None, size=64)
 
 
+def setup_firepower(player: Player):
+    fire_images = ['fire-{}.png'.format(i) for i in range(1)]
+    fire = Throwable(player.rect.x, player.rect.y, *fire_images)
+    # TODO Move out of file
+
+    return fire, SpriteList()
+
+
 class World:
     def __init__(self, tx, ty):
         self.world = pygame.display.set_mode([worldx, worldy])
@@ -81,9 +89,7 @@ class World:
         self.player = Player(0, 0)
 
         # Firepower setup
-        self.fire = Throwable(self.player.rect.x, self.player.rect.y,
-                              'fire.png')
-        self.firepower = pygame.sprite.Group()
+        self.fire, self.firepower = setup_firepower(self.player)
 
         # Platform/Ground setup
         gloc = []
@@ -122,14 +128,13 @@ class World:
     def fireball(self, flame):
         if not self.fire.firing:
             self.fire = Throwable(
-                self.player.rect.x, self.player.rect.y, 'fire.png',
+                self.player.rect.x, self.player.rect.y, 'fire-0.png',
                 throw=True, forward=self.player.facing_right)
             pygame.mixer.Sound.play(flame)
             self.firepower.add(self.fire)
 
     def update(self, tx, ty):
-        backdropbox = self.world.get_rect()
-        self.world.blit(self.backdrop, backdropbox)
+        self.world.blit(self.backdrop, self.world.get_rect())
 
         self.player.update(self.enemy_list, self.ground_list, self.plat_list,
                            self.loot_list, tx, ty)

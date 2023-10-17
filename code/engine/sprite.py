@@ -28,6 +28,7 @@ class Sprite(pygame.sprite.Sprite):
         self.movey = 0
 
         self.frame = 0
+        self.forward = True
 
     def hit_list(self, ob_list):
         return pygame.sprite.spritecollide(self, ob_list, False)
@@ -67,3 +68,26 @@ class Sprite(pygame.sprite.Sprite):
 
         self.rect.x += self.movex
         self.rect.y += self.movey
+
+
+class SpriteList:
+    """
+    Wrapper for pygame's Group class
+    """
+    def __init__(self):
+        self.list = pygame.sprite.Group()
+
+    def add(self, sprite):
+        self.list.add(sprite)
+
+    def sprites(self):
+        return self.list.sprites()
+
+    def draw(self, world):
+        self.list.draw(world)
+
+    def remove(self, sprite):
+        self.list.remove(sprite)
+
+    def __iter__(self):
+        return iter(self.list)
