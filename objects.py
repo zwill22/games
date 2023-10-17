@@ -39,11 +39,49 @@ class Sprite(pygame.sprite.Sprite):
         self.rect.x = xloc
         self.rect.y = yloc
 
+        self.movex = 0
+        self.movey = 0
+
+        self.frame = 0
+
     def hit_list(self, ob_list):
         return pygame.sprite.spritecollide(self, ob_list, False)
 
     def hit(self, pysprite) -> bool:
         return pysprite.rect.colliderect(self.rect)
+
+    def control(self, x, y):
+        self.movex += x
+        self.movey += y
+
+    def stop(self):
+        self.movex = 0
+        self.movey = 0
+
+    def draw(self, world):
+        sprite_list = pygame.sprite.Group()
+        sprite_list.add(self)
+        sprite_list.draw(world)
+
+    def update_sprite(self):
+        n = len(self.images)
+
+        if n > 1:
+            if self.movex < 0 or self.movex > 0:
+                self.frame += 1
+                if self.frame > (n - 1) * ani:
+                    self.frame = 0
+
+        if self.movex < 0:
+            self.image = pygame.transform.flip(
+                self.images[self.frame//ani], True, False
+            )
+
+        if self.movex > 0:
+            self.image = self.images[self.frame//ani]
+
+        self.rect.x += self.movex
+        self.rect.y += self.movey
 
 
 class Player(Sprite):
@@ -55,64 +93,32 @@ class Player(Sprite):
         hero = ["hero-{}.png".format(i) for i in range(4)]
 
         Sprite.__init__(self, x, y, *hero, **kwargs)
-        self.movex = 0
-        self.movey = 0
         self.frame = 0
         self.health = 10
         self.damage = False
         self.score = 0
 
-        self.facing_right = True
-
         self.is_jumping = True
         self.is_falling = False
 
-    def draw(self, world):
-        player_list = pygame.sprite.Group()
-        player_list.add(self)
-        player_list.draw(world)
-
-    def gravity(self, ty):
+    def gravity(self):
         if self.is_jumping:
             self.movey += 2
-
-    def control(self, x, y):
-        """
-        Control player movement
-        """
-        self.movex += x
-        self.movey += y
 
     def jump(self):
         if not self.is_jumping:
             self.is_falling = False
             self.is_jumping = True
 
-    def stop(self):
-        """
-        Stop player movement
-        """
-        self.movex = 0
-        self.movey = 0
-
-    def update(self, enemy_list, ground_list, plat_list, loot_list, tx, ty):
+    def update(self, enemy_list, ground_list, plat_list, loot_list,
+                      tx, ty):
         """
         Update sprite position
         """
+        self.update_sprite()
 
         if self.movex < 0 or self.movex > 0:
             self.is_jumping = True
-            self.frame += 1
-            if self.frame > 3 * ani:
-                self.frame = 0
-
-        if self.movex < 0:
-            self.image = pygame.transform.flip(
-                self.images[self.frame//ani], True, False
-            )
-
-        if self.movex > 0:
-            self.image = self.images[self.frame//ani]
 
         enemy_hit_list = self.hit_list(enemy_list)
         if not self.damage:
@@ -157,9 +163,6 @@ class Player(Sprite):
             self.is_falling = True
             self.movey -= 24
 
-        self.rect.x += self.movex
-        self.rect.y += self.movey
-
 
 class Enemy(Sprite):
     """
@@ -170,14 +173,11 @@ class Enemy(Sprite):
         Sprite.__init__(self, x, y, *imgs, **kwargs)
 
         self.counter = 0
-        self.frame = 0
 
-        self.movey = 0
         self.is_falling = True
-
-        self.forward = True
         self.health = 1
 
+        # TODO Remove sound
         self.burn = pygame.mixer.Sound(
             os.path.join('sound', 'fire_sound_effect.mp3'))
 
@@ -190,11 +190,9 @@ class Enemy(Sprite):
         speed = 4
 
         if 0 <= self.counter <= distance:
-            self.rect.x += speed
-            self.forward = True
+            self.movex = speed
         elif distance < self.counter <= distance * 2:
-            self.rect.x -= speed
-            self.forward = False
+            self.movex = -speed
         else:
             self.counter = 0
 
@@ -217,16 +215,7 @@ class Enemy(Sprite):
         """
         Update sprite position and detect collisions
         """
-        self.frame += 1
-        if self.frame > 3 * ani:
-            self.frame = 0
-
-        if self.forward:
-            self.image = self.images[self.frame // ani]
-        else:
-            self.image = pygame.transform.flip(
-                self.images[self.frame//ani], True, False
-            )
+        self.update_sprite()
 
         if self.hit(player):
             self.health -= 1
@@ -255,18 +244,22 @@ class Throwable(Sprite):
         Sprite.__init__(self, x, y, *images, **kwargs)
 
         self.firing = throw
-        self.forward = forward
+
+        speed = 15
+        if forward:
+            self.movex = speed
+        else:
+            self.movex = -speed
+        self.movey = 0
 
     def update(self):
         """
         Throw physics
         """
+        self.update_sprite()
+
         if 0 < self.rect.y < worldy and 0 < self.rect.x < worldx:
-            if self.forward:
-                self.rect.x += 15
-            else:
-                self.rect.x -= 15
-            self.rect.y += 0
+            pass
         else:
             self.kill()
             self.firing = False

@@ -133,7 +133,7 @@ class World:
 
         self.player.update(self.enemy_list, self.ground_list, self.plat_list,
                            self.loot_list, tx, ty)
-        self.player.gravity(ty)
+        self.player.gravity()
 
         for ob_list in (self.ground_list, self.plat_list, self.player,
                         self.enemy_list, self.loot_list):
