@@ -17,7 +17,6 @@
 
 import os
 
-from variables import worldy, worldx
 from code.engine import Sprite
 
 from pygame.mixer import Sound
@@ -51,8 +50,8 @@ class Player(Sprite):
             self.is_falling = False
             self.is_jumping = True
 
-    def update(self, enemy_list, ground_list, plat_list, loot_list,
-                      tx, ty):
+    def update(self, enemy_list, ground_list, plat_list, loot_list, worldx,
+               worldy, tx, ty):
         """
         Update sprite position
         """
@@ -125,7 +124,7 @@ class Enemy(Sprite):
         """
         Enemy movement
         """
-        # TODO Remove magic numbers
+        # TODO Remove magic numbers, make attributes
         distance = 30
         speed = 4
 
@@ -138,7 +137,7 @@ class Enemy(Sprite):
 
         self.counter += 1
 
-    def gravity(self, ty):
+    def gravity(self, worldy, ty):
         """
         Simulate gravity on enemy
         """
@@ -191,7 +190,7 @@ class Throwable(Sprite):
             self.movex = -speed
         self.movey = 0
 
-    def update(self):
+    def update(self, worldx, worldy):
         """
         Throw physics
         """

@@ -19,7 +19,6 @@ import os.path
 import pygame.freetype
 
 import level
-from variables import worldx, worldy, fps
 from objects import Player, Throwable
 from code.engine import SpriteList
 
@@ -81,7 +80,14 @@ def setup_firepower(player: Player):
 
 
 class World:
-    def __init__(self, tx, ty):
+    def __init__(self, worldx, worldy, tx, ty, edges):
+        self.worldx = worldx
+        self.worldy = worldy
+
+        self.tx = tx
+        self.ty = ty
+        self.edges = edges
+
         self.world = pygame.display.set_mode([worldx, worldy])
         self.backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
 
@@ -99,12 +105,12 @@ class World:
             gloc.append(i * tx)
             i += 1
 
-        self.ground_list = level.ground(1, gloc, tx, ty)
-        self.plat_list = level.platform(1, tx, ty)
+        self.ground_list = level.ground(1, gloc, worldy, ty)
+        self.plat_list = level.platform(1, tx, ty, worldy)
 
         # Enemy and loot setup
         enemy_loc = [self.plat_list.sprites()[1].rect.x,
-                self.plat_list.sprites()[1].rect.y - ty]
+                     self.plat_list.sprites()[1].rect.y - ty]
         self.enemy_list = level.bad(1, enemy_loc)
 
         self.loot_list = level.loot(1, tx, ty)
@@ -124,7 +130,10 @@ class World:
             for ob in ob_list:
                 ob.rect.y += scroll
 
-    def scroll(self, bx, fx, by, fy):
+    def scroll(self):
+        assert len(self.edges) == 4
+        bx, fx, by, fy = self.edges
+
         if self.player.rect.x >= fx:
             scroll = self.player.rect.x - fx
             self.scroll_objects_x(fx, -scroll)
@@ -149,11 +158,12 @@ class World:
             pygame.mixer.Sound.play(flame)
             self.firepower.add(self.fire)
 
-    def update(self, tx, ty):
+    def update(self):
         self.world.blit(self.backdrop, self.world.get_rect())
 
         self.player.update(self.enemy_list, self.ground_list, self.plat_list,
-                           self.loot_list, tx, ty)
+                           self.loot_list, self.worldx, self.worldy, self.tx,
+                           self.ty)
         self.player.gravity()
 
         for ob_list in (self.ground_list, self.plat_list, self.player,
@@ -161,12 +171,12 @@ class World:
             ob_list.draw(self.world)
 
         if self.fire.firing:
-            self.fire.update()
+            self.fire.update(self.worldx, self.worldy)
             self.firepower.draw(self.world)
 
         for enemy in self.enemy_list:
             enemy.move()
-            enemy.gravity(ty)
+            enemy.gravity(self.worldy, self.ty)
             enemy.update(self.player, self.enemy_list, self.ground_list,
                          self.plat_list, self.firepower)
 
@@ -175,6 +185,10 @@ class World:
 
 
 def main():
+
+    worldx = 960
+    worldy = 720
+    fps = 40
 
     tx = 64
     ty = 64
@@ -189,7 +203,7 @@ def main():
     clock = pygame.time.Clock()
     pygame.init()
 
-    world = World(tx, ty)
+    world = World(worldx, worldy, tx, ty, edges)
 
     player = world.player
 
@@ -275,9 +289,8 @@ def main():
                             "Invalid input type: {}".format(input_type))
                     player.stop()
 
-        world.scroll(*edges)
-
-        world.update(tx, ty)
+        world.scroll()
+        world.update()
         world.stats(my_font)
 
         pygame.display.flip()

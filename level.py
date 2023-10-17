@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from variables import worldy
 from objects import Platform, Enemy
 from code.engine import SpriteList
 
@@ -34,7 +33,7 @@ def invalid_level(lvl):
     #     return ground_list
 
 
-def ground(lvl, gloc, tx, ty) -> SpriteList:
+def ground(lvl, gloc, worldy, ty) -> SpriteList:
     ground_list = SpriteList()
     i = 0
     if lvl == 1:
@@ -61,7 +60,7 @@ def ground(lvl, gloc, tx, ty) -> SpriteList:
 #     return plat_list
 
 
-def platform(lvl, tx, ty) -> SpriteList:
+def platform(lvl, tx, ty, worldy) -> SpriteList:
     plat_list = SpriteList()
     ploc = []
     if lvl == 1:
