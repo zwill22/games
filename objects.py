@@ -43,21 +43,21 @@ class Player(Sprite):
 
     def gravity(self):
         if self.is_jumping:
-            self.movey += 2
+            self.move_y += 2
 
     def jump(self):
         if not self.is_jumping:
             self.is_falling = False
             self.is_jumping = True
 
-    def update(self, enemy_list, ground_list, plat_list, loot_list, worldx,
-               worldy, tx, ty):
+    def update(self, enemy_list, ground_list, plat_list, loot_list, world_x,
+               world_y, tx, ty):
         """
         Update sprite position
         """
         self.update_sprite()
 
-        if self.movex < 0 or self.movex > 0:
+        if self.move_x < 0 or self.move_x > 0:
             self.is_jumping = True
 
         enemy_hit_list = self.hit_list(enemy_list)
@@ -73,7 +73,7 @@ class Player(Sprite):
 
         ground_hit_list = self.hit_list(ground_list)
         for g in ground_hit_list:
-            self.movey = 0
+            self.move_y = 0
             self.rect.bottom = g.rect.top
             self.is_jumping = False
 
@@ -85,23 +85,23 @@ class Player(Sprite):
         plat_hit_list = self.hit_list(plat_list)
         for p in plat_hit_list:
             self.is_jumping = False
-            self.movey = 0
+            self.move_y = 0
 
             # approach from below
             if self.rect.bottom < p.rect.bottom:
                 self.rect.bottom = p.rect.top
             else:
-                self.movey += 2
+                self.move_y += 2
 
         # Fall off the world
-        if self.rect.y > worldy:
+        if self.rect.y > world_y:
             self.health -= 1
             self.rect.x = tx
             self.rect.y = ty
 
         if self.is_jumping and not self.is_falling:
             self.is_falling = True
-            self.movey -= 24
+            self.move_y -= 24
 
 
 class Enemy(Sprite):
@@ -129,25 +129,25 @@ class Enemy(Sprite):
         speed = 4
 
         if 0 <= self.counter <= distance:
-            self.movex = speed
+            self.move_x = speed
         elif distance < self.counter <= distance * 2:
-            self.movex = -speed
+            self.move_x = -speed
         else:
             self.counter = 0
 
         self.counter += 1
 
-    def gravity(self, worldy, ty):
+    def gravity(self, world_y, ty):
         """
         Simulate gravity on enemy
         """
         if self.is_falling:
-            self.movey += 2
-            self.rect.y += self.movey
+            self.move_y += 2
+            self.rect.y += self.move_y
 
-        if self.rect.y > worldy and self.movey >= 0:
-            self.movey = 0
-            self.rect.y = worldy - ty - ty
+        if self.rect.y > world_y and self.move_y >= 0:
+            self.move_y = 0
+            self.rect.y = world_y - ty - ty
 
     def update(self, player: Player, enemy_list, ground_list, plat_list,
                firepower):
@@ -169,7 +169,7 @@ class Enemy(Sprite):
         for ob_list in (ground_list, plat_list):
             ground_hit_list = self.hit_list(ob_list)
             for g in ground_hit_list:
-                self.movey = 0
+                self.move_y = 0
                 self.rect.bottom = g.rect.top
                 self.is_falling = False
 
@@ -185,18 +185,18 @@ class Throwable(Sprite):
 
         speed = 15
         if forward:
-            self.movex = speed
+            self.move_x = speed
         else:
-            self.movex = -speed
-        self.movey = 0
+            self.move_x = -speed
+        self.move_y = 0
 
-    def update(self, worldx, worldy):
+    def update(self, world_x, world_y):
         """
         Throw physics
         """
         self.update_sprite()
 
-        if 0 < self.rect.y < worldy and 0 < self.rect.x < worldx:
+        if 0 < self.rect.y < world_y and 0 < self.rect.x < world_x:
             pass
         else:
             self.kill()

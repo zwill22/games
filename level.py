@@ -22,52 +22,28 @@ from code.engine import SpriteList
 def invalid_level(lvl):
     ValueError("Invalid level: {}".format(lvl))
 
-# def ground(self, lvl, x, y, w, h):
-    #     ground_list = pygame.sprite.Group()
-    #     if lvl == 1:
-    #         gr = Platform(x, y, w, h, 'block-ground.png')
-    #         ground_list.add(gr)
-    #     else:
-    #         self.invalid_level(lvl)
-    #
-    #     return ground_list
 
-
-def ground(lvl, gloc, worldy, ty) -> SpriteList:
+def ground(lvl, gloc, world_y, ty) -> SpriteList:
     ground_list = SpriteList()
-    i = 0
+
     if lvl == 1:
         for g in gloc:
-            gr = Platform(g, worldy - ty, 'tile-ground.png')
+            gr = Platform(g, world_y - ty, 'tile-ground.png')
             ground_list.add(gr)
     else:
         invalid_level(lvl)
 
     return ground_list
 
-# def platform(lvl):
-#     plat_list = pygame.sprite.Group()
-#     if lvl == 1:
-#         plat = Platform(200, worldy - 97 - 128, 285, 67,
-#                         'block-big.png')
-#         plat_list.add(plat)
-#         plat = Platform(500, worldy - 97 - 320, 197, 54,
-#                         'block-small.png')
-#         plat_list.add(plat)
-#     else:
-#         invalid_level(lvl)
-#
-#     return plat_list
 
-
-def platform(lvl, tx, ty, worldy) -> SpriteList:
+def platform(lvl, tx, ty, world_y) -> SpriteList:
     plat_list = SpriteList()
-    ploc = []
+    plat_loc = []
     if lvl == 1:
-        ploc.append((300, worldy-ty-256, 4))
-        ploc.append((200, worldy-ty-128, 3))
-        ploc.append((500, worldy-ty-128, 4))
-        for pl in ploc:
+        plat_loc.append((300, world_y - ty - 256, 4))
+        plat_loc.append((200, world_y - ty - 128, 3))
+        plat_loc.append((500, world_y - ty - 128, 4))
+        for pl in plat_loc:
             for j in range(pl[2] + 1):
                 plat = Platform((pl[0]+(j*tx)), pl[1], 'tile.png')
                 plat_list.add(plat)
@@ -88,13 +64,13 @@ def loot(lvl, tx, ty) -> SpriteList:
     return loot_list
 
 
-def bad(lvl, eloc) -> SpriteList:
+def bad(lvl, enemy_loc) -> SpriteList:
     enemy_list = SpriteList()
 
     if lvl == 1:
         images = ["enemy-{}.png".format(i) for i in range(4)]
 
-        enemy = Enemy(eloc[0], eloc[1], *images)
+        enemy = Enemy(enemy_loc[0], enemy_loc[1], *images)
         enemy_list.add(enemy)
     else:
         invalid_level(lvl)

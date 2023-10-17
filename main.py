@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # by Zack M. Williams
-import os.path
 
 # # GPLv3
 # This program is free software: you can redistribute it and/or
@@ -15,6 +14,8 @@ import os.path
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import os.path
 
 import pygame
 import pygame.freetype
@@ -81,19 +82,19 @@ def setup_firepower(player: Player):
 
 
 class World:
-    def __init__(self, worldx, worldy, tx, ty, edges):
-        self.worldx = worldx
-        self.worldy = worldy
+    def __init__(self, world_x, world_y, tx, ty, edges):
+        self.world_x = world_x
+        self.world_y = world_y
 
         self.tx = tx
         self.ty = ty
         self.edges = edges
 
-        self.world = pygame.display.set_mode([worldx, worldy])
+        self.world = pygame.display.set_mode([world_x, world_y])
         self.backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
 
         # Player setup
-        self.player = Player(0, worldy/2)
+        self.player = Player(0, world_y / 2)
 
         # Firepower setup
         self.fire, self.firepower = setup_firepower(self.player)
@@ -102,12 +103,12 @@ class World:
         gloc = []
 
         i = 0
-        while i < (worldx / tx) + tx:
+        while i < (world_x / tx) + tx:
             gloc.append(i * tx)
             i += 1
 
-        self.ground_list = level.ground(1, gloc, worldy, ty)
-        self.plat_list = level.platform(1, tx, ty, worldy)
+        self.ground_list = level.ground(1, gloc, world_y, ty)
+        self.plat_list = level.platform(1, tx, ty, world_y)
 
         # Enemy and loot setup
         enemy_loc = [self.plat_list.sprites()[1].rect.x,
@@ -163,7 +164,7 @@ class World:
         self.world.blit(self.backdrop, self.world.get_rect())
 
         self.player.update(self.enemy_list, self.ground_list, self.plat_list,
-                           self.loot_list, self.worldx, self.worldy, self.tx,
+                           self.loot_list, self.world_x, self.world_y, self.tx,
                            self.ty)
         self.player.gravity()
 
@@ -172,12 +173,12 @@ class World:
             ob_list.draw(self.world)
 
         if self.fire.firing:
-            self.fire.update(self.worldx, self.worldy)
+            self.fire.update(self.world_x, self.world_y)
             self.firepower.draw(self.world)
 
         for enemy in self.enemy_list:
             enemy.move()
-            enemy.gravity(self.worldy, self.ty)
+            enemy.gravity(self.world_y, self.ty)
             enemy.update(self.player, self.enemy_list, self.ground_list,
                          self.plat_list, self.firepower)
 
@@ -187,8 +188,8 @@ class World:
 
 def main():
 
-    worldx = 960
-    worldy = 720
+    world_x = 960
+    world_y = 720
     fps = 40
 
     tx = 64
@@ -196,7 +197,7 @@ def main():
     steps = 10
     input_type = "keyboard"
 
-    edges = (0.3 * worldx, 0.7 * worldx, 0.17 * worldy, 0.83 * worldy)
+    edges = (0.3 * world_x, 0.7 * world_x, 0.17 * world_y, 0.83 * world_y)
 
     """
     Setup
@@ -204,7 +205,7 @@ def main():
     clock = pygame.time.Clock()
     pygame.init()
 
-    world = World(worldx, worldy, tx, ty, edges)
+    world = World(world_x, world_y, tx, ty, edges)
 
     player = world.player
 
@@ -238,7 +239,7 @@ def main():
             if input_type == "mouse":
                 if event.type == pygame.MOUSEMOTION:
                     mx, my = pygame.mouse.get_pos()
-                    x_max = worldx - player.image.get_size()[0]
+                    x_max = world_x - player.image.get_size()[0]
 
                     if pygame.mouse.get_focused():
                         pygame.mouse.set_visible(False)
