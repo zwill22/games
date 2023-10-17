@@ -16,6 +16,7 @@ import os.path
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import pygame
 import pygame.freetype
 
 import level
@@ -273,7 +274,7 @@ def main():
                 raise ValueError("Invalid input type: {}".format(input_type))
 
             if event.type == pygame.KEYDOWN:
-                if event.key == ord('q'):
+                if event.key == ord('q') or event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     return 0
                 if event.key == ord('i'):
