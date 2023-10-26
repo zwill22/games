@@ -21,8 +21,9 @@ import pygame
 import pygame.freetype
 
 import level
-from objects import Player, Throwable
+from objects import Throwable
 from code.engine import SpriteList
+from code.objects import Player
 
 """
 TODO list
