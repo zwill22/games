@@ -20,10 +20,10 @@ import os.path
 import pygame
 import pygame.freetype
 
-import level
-from objects import Throwable
-from code.engine import SpriteList
-from code.objects import Player
+from .levels import level
+from .objects import Throwable
+from gamecode.engine import SpriteList
+from gamecode.objects import Player
 
 """
 TODO list
@@ -211,8 +211,7 @@ def main():
     player = world.player
 
     # Font setup
-    font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "fonts", "Clickuper.ttf")
+    font_path = os.path.join("fonts", "Clickuper.ttf")
     fontsize = tx
     pygame.freetype.init()
     my_font = pygame.freetype.Font(font_path, size=fontsize)

@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from objects import Platform, Enemy
-from code.engine import SpriteList
+from gamecode.objects import Platform, Enemy
+from gamecode.engine import SpriteList
 
 
 def invalid_level(lvl):

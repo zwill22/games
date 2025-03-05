@@ -17,8 +17,8 @@
 
 import os
 
-from code.engine import Sprite
-from code.objects import Player
+from gamecode.engine import Sprite
+from gamecode.objects import Player
 
 from pygame.mixer import Sound
 
