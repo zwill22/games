@@ -1,2 +1,4 @@
 from .player import Player
-from .objects import Platform, Enemy, Throwable
+from .enemy import Enemy
+from .throwable import Throwable
+from .platform import Platform

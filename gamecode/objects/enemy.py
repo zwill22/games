@@ -91,35 +91,3 @@ class Enemy(Sprite):
                 self.move_y = 0
                 self.rect.bottom = g.rect.top
                 self.is_falling = False
-
-
-class Throwable(Sprite):
-    """
-    Spawn a throwable object
-    """
-    def __init__(self, x, y, *images, throw=False, forward=True, **kwargs):
-        Sprite.__init__(self, x, y, *images, **kwargs)
-
-        self.firing = throw
-
-        speed = 15
-        if forward:
-            self.move_x = speed
-        else:
-            self.move_x = -speed
-        self.move_y = 0
-
-    def update(self, world_x, world_y):
-        """
-        Throw physics
-        """
-        self.update_sprite()
-
-        if 0 < self.rect.y < world_y and 0 < self.rect.x < world_x:
-            pass
-        else:
-            self.kill()
-            self.firing = False
-
-
-Platform = Sprite
