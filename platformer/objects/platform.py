@@ -15,33 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gamecode.engine import Sprite
 
-class Throwable(Sprite):
+from platformer.engine import Sprite
+
+
+class Platform(Sprite):
     """
-    Spawn a throwable object
+    Spawn an enemy
     """
-    def __init__(self, x, y, *images, throw=False, forward=True, **kwargs):
-        Sprite.__init__(self, x, y, *images, **kwargs)
 
-        self.firing = throw
+    def __init__(self, x, y, *imgs, **kwargs):
 
-        speed = 15
-        if forward:
-            self.move_x = speed
-        else:
-            self.move_x = -speed
-        self.move_y = 0
-
-    def update(self, world_x, world_y):
-        """
-        Throw physics
-        """
-        self.update_sprite()
-
-        if 0 < self.rect.y < world_y and 0 < self.rect.x < world_x:
-            pass
-        else:
-            self.kill()
-            self.firing = False
-
+        Sprite.__init__(self, x, y, *imgs, **kwargs)

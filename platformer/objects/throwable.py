@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # by Zack M. Williams
-import os
 
 # # GPLv3
 # This program is free software: you can redistribute it and/or
@@ -16,22 +15,33 @@ import os
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PIL import Image
+from platformer.engine import Sprite
 
+class Throwable(Sprite):
+    """
+    Spawn a throwable object
+    """
+    def __init__(self, x, y, *images, throw=False, forward=True, **kwargs):
+        Sprite.__init__(self, x, y, *images, **kwargs)
 
-def image_size(image_file: str) -> tuple:
-    return Image.open(image_file).size
+        self.firing = throw
 
+        speed = 15
+        if forward:
+            self.move_x = speed
+        else:
+            self.move_x = -speed
+        self.move_y = 0
 
-def main():
-    path = 'images'
+    def update(self, world_x, world_y):
+        """
+        Throw physics
+        """
+        self.update_sprite()
 
-    for pic in os.listdir(path):
+        if 0 < self.rect.y < world_y and 0 < self.rect.x < world_x:
+            pass
+        else:
+            self.kill()
+            self.firing = False
 
-        size = image_size(os.path.join(path, pic))
-
-        print(pic, ":", size)
-
-
-if __name__ == '__main__':
-    main()

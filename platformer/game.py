@@ -20,7 +20,7 @@ import os.path
 import pygame
 import pygame.freetype
 
-from world import World
+from platformer.world import World
 
 """
 TODO list

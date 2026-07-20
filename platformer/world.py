@@ -1,10 +1,12 @@
 import os
 import pygame
 
-from objects import Player
-from levels import level
-from engine import SpriteList
-from objects import Throwable
+import pygame.freetype
+
+from platformer.objects import Player
+from platformer.levels import level
+from platformer.engine import SpriteList
+from platformer.objects import Throwable
 
 
 def stats(world, font: pygame.freetype.Font, score: int, health: int):
@@ -50,30 +52,23 @@ class World:
         # Firepower setup
         self.fire, self.firepower = setup_firepower(self.player)
 
-        # Platform/Ground setup
-        gloc = []
+        self.reinitialise_lists()
 
-        i = 0
-        while i < (world_x / tx) + tx:
-            gloc.append(i * tx)
-            i += 1
-
-        self.ground_list = level.ground(1, gloc, world_y, ty)
-        self.plat_list = level.platform(1, tx, ty, world_y)
-
-        # Enemy and loot setup
-        enemy_loc = [
-            self.plat_list.sprites()[1].rect.x,
-            self.plat_list.sprites()[1].rect.y - ty,
-        ]
-        self.enemy_list = level.bad(1, enemy_loc)
-
-        self.loot_list = level.loot(1, tx, ty)
+    def reinitialise_lists(self):
+        self.ground_list = level.ground(1, self.tx, self.ty, self.world_y)
+        self.plat_list = level.platform(1, self.tx, self.ty, self.world_y)
+        self.enemy_list = level.enemies(1, self.tx, self.ty, self.world_y)
+        self.loot_list = level.loot(1, self.tx, self.ty, self.world_y)
 
     def scroll_objects_x(self, fx, scroll):
         self.player.rect.x = fx
 
-        for ob_list in (self.plat_list, self.enemy_list, self.loot_list):
+        for ob_list in (
+            self.plat_list,
+            self.enemy_list,
+            self.loot_list,
+            self.ground_list,
+        ):
             for ob in ob_list:
                 ob.rect.x += scroll
 
@@ -129,11 +124,9 @@ class World:
             self.ground_list,
             self.plat_list,
             self.loot_list,
-            self.world_x,
             self.world_y,
-            self.tx,
-            self.ty,
         )
+
         self.player.gravity()
 
         for ob_list in (
@@ -160,5 +153,13 @@ class World:
                 self.firepower,
             )
 
+        for loot in self.loot_list:
+            loot.update()
+            
+        if self.player.reset_required:
+             self.player.reset()
+             self.reinitialise_lists()
+
     def stats(self, font):
         stats(self.world, font, self.player.score, self.player.health)
+

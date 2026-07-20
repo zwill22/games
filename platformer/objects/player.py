@@ -1,15 +1,22 @@
 from ..engine import Sprite
 
 
+def reset_all(*lists):
+    for list in lists:
+        for item in list:
+            item.reset()
+
+
 class Player(Sprite):
     """
     Spawn a player
     """
 
     def __init__(self, x, y, **kwargs):
-        hero = ["hero-{}.png".format(i) for i in range(4)]
+        hero = ["hero-0.png"]
 
         Sprite.__init__(self, x, y, *hero, **kwargs)
+
         self.frame = 0
         self.health = 10
         self.damage = False
@@ -20,6 +27,8 @@ class Player(Sprite):
 
         self.facing_right = True
 
+        self.reset_required = False
+
     def gravity(self):
         if self.is_jumping:
             self.move_y += 2
@@ -29,8 +38,20 @@ class Player(Sprite):
             self.is_falling = False
             self.is_jumping = True
 
-    def update(self, enemy_list, ground_list, plat_list, loot_list, world_x,
-               world_y, tx, ty):
+    def reset(self):
+        super().reset()
+
+        self.damage = False
+        self.score = 0
+
+        self.is_jumping = True
+        self.is_falling = False
+
+        self.facing_right = True
+
+        self.reset_required = False
+
+    def update(self, enemy_list, ground_list, plat_list, loot_list, world_y):
         """
         Update sprite position
         """
@@ -38,17 +59,19 @@ class Player(Sprite):
 
         if self.move_x < 0 or self.move_x > 0:
             self.is_jumping = True
-
+            
         enemy_hit_list = self.hit_list(enemy_list)
         if not self.damage:
             for enemy in enemy_list:
                 if not self.rect.contains(enemy):
                     self.damage = self.rect.colliderect(enemy)
+        
         if self.damage:
             idx = self.rect.collidelist(enemy_hit_list)
             if idx == -1:
                 self.damage = 0
                 self.health -= 1
+                self.reset_required = True
 
         ground_hit_list = self.hit_list(ground_list)
         for g in ground_hit_list:
@@ -75,8 +98,7 @@ class Player(Sprite):
         # Fall off the world
         if self.rect.y > world_y:
             self.health -= 1
-            self.rect.x = tx
-            self.rect.y = ty
+            self.reset_required = True
 
         if self.is_jumping and not self.is_falling:
             self.is_falling = True

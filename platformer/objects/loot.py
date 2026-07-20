@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # by Zack M. Williams
-import os
 
 # # GPLv3
 # This program is free software: you can redistribute it and/or
@@ -16,22 +15,27 @@ import os
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PIL import Image
+from platformer.engine import Sprite
 
 
-def image_size(image_file: str) -> tuple:
-    return Image.open(image_file).size
+class Loot(Sprite):
+    """
+    Spawn an enemy
+    """
 
+    def __init__(self, x, y, *imgs, **kwargs):
 
-def main():
-    path = 'images'
+        Sprite.__init__(self, x, y, *imgs, **kwargs, ani=8)
 
-    for pic in os.listdir(path):
+    def update(self):
+        """
+        Update sprite position and detect collisions
+        """
+        n = len(self.images)
 
-        size = image_size(os.path.join(path, pic))
+        if n > 1:
+            self.frame += 1
+            if self.frame > (n - 1) * self.ani:
+                self.frame = 0
 
-        print(pic, ":", size)
-
-
-if __name__ == '__main__':
-    main()
+        self.image = self.images[self.frame // self.ani]

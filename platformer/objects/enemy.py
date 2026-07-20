@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import math
 import os
 
-from gamecode.engine import Sprite
-from gamecode.objects import Player
+from platformer.engine import Sprite
+from platformer.objects import Player
 
 from pygame.mixer import Sound
 
@@ -44,17 +45,17 @@ class Enemy(Sprite):
         Enemy movement
         """
         # TODO Remove magic numbers, make attributes
-        distance = 30
         speed = 4
-
-        if 0 <= self.counter <= distance:
-            self.move_x = speed
-        elif distance < self.counter <= distance * 2:
-            self.move_x = -speed
+        n = 20
+        
+        sign = math.copysign(1, math.sin(self.counter * math.pi / n))
+        
+        self.move_x = sign * speed
+        if self.counter < 10 * n:
+            self.counter += 1
         else:
             self.counter = 0
-
-        self.counter += 1
+        
 
     def gravity(self, world_y, ty):
         """
@@ -77,13 +78,12 @@ class Enemy(Sprite):
 
         if self.hit(player):
             self.health -= 1
-            print(self.health)
 
         fire_hit_list = self.hit_list(firepower)
-        for fire in fire_hit_list:
+        for _ in fire_hit_list:
             # TODO Add death animation
             enemy_list.remove(self)
-            self.burn.play(1, 150)
+            self.burn.play(0, 150)
 
         for ob_list in (ground_list, plat_list):
             ground_hit_list = self.hit_list(ob_list)
