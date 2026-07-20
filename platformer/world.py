@@ -1,11 +1,8 @@
-import os
-import pygame
-
 import pygame.freetype
 
 from platformer.objects import Player
 from platformer.levels import level
-from platformer.engine import SpriteList
+from platformer.engine import SpriteList, load_image
 from platformer.objects import Throwable
 
 
@@ -27,6 +24,7 @@ def stats(world, font: pygame.freetype.Font, score: int, health: int, muted: boo
 
 
 def setup_firepower(player: Player):
+
     fire_images = ["fire-{}.png".format(i) for i in range(1)]
     fire = Throwable(player.rect.x, player.rect.y, *fire_images)
     # TODO Move out of file
@@ -35,16 +33,17 @@ def setup_firepower(player: Player):
 
 
 class World:
-    def __init__(self, world_x, world_y, tx, ty, edges):
-        self.world_x = world_x
-        self.world_y = world_y
+    def __init__(self, world_x, world_y, tx, ty, edges, sounds):
+        self.x = world_x
+        self.y = world_y
 
         self.tx = tx
         self.ty = ty
         self.edges = edges
+        self.level = 1
 
-        self.world = pygame.display.set_mode([world_x, world_y])
-        self.backdrop = pygame.image.load(os.path.join("images", "stage.png"))
+        self.display = pygame.display.set_mode([world_x, world_y])
+        self.backdrop = load_image(f"background-{self.level}.png")
 
         # Player setup
         self.player = Player(0, world_y / 2)
@@ -55,10 +54,33 @@ class World:
         self.reinitialise_lists()
 
     def reinitialise_lists(self):
-        self.ground_list = level.ground(1, self.tx, self.ty, self.world_y)
-        self.plat_list = level.platform(1, self.tx, self.ty, self.world_y)
-        self.enemy_list = level.enemies(1, self.tx, self.ty, self.world_y)
-        self.loot_list = level.loot(1, self.tx, self.ty, self.world_y)
+        self.ground_list = level.ground(1, self.tx, self.ty, self.y)
+        self.plat_list = level.platform(1, self.tx, self.ty, self.y)
+        self.enemy_list = level.enemies(1, self.tx, self.ty, self.y)
+        self.loot_list = level.loot(1, self.tx, self.ty, self.y)
+
+    def get_x_max(self):
+        return self.x - self.player.image.get_size()[0]
+
+    def control_player(self, x, y):
+
+        self.player.control(x, y)
+
+    def player_left(self):
+        self.player.facing_right = False
+
+    def player_right(self):
+        self.player.facing_right = True
+
+    def make_player_jump(self):
+        self.player.jump()
+
+    def stop_player(self):
+        self.player.stop()
+
+    def reset(self):
+        self.player.reset()
+        self.reinitialise_lists()
 
     def scroll_objects_x(self, fx, scroll):
         self.player.rect.x = fx
@@ -104,7 +126,7 @@ class World:
             scroll = by - self.player.rect.y
             self.scroll_objects_y(by, scroll)
 
-    def fireball(self, flame):
+    def fireball(self, sounds):
         if not self.fire.firing:
             self.fire = Throwable(
                 self.player.rect.x,
@@ -113,19 +135,25 @@ class World:
                 throw=True,
                 forward=self.player.facing_right,
             )
+
+            flame = sounds["flame"]
             pygame.mixer.Sound.play(flame)
             self.firepower.add(self.fire)
 
     def update(self):
-        self.world.blit(self.backdrop, self.world.get_rect())
+        self.display.blit(self.backdrop, self.display.get_rect())
 
         self.player.update(
             self.enemy_list,
             self.ground_list,
             self.plat_list,
             self.loot_list,
-            self.world_y,
+            self.y,
         )
+
+        if self.player.reset_required:
+            self.reset()
+            return
 
         self.player.gravity()
 
@@ -136,15 +164,15 @@ class World:
             self.enemy_list,
             self.loot_list,
         ):
-            ob_list.draw(self.world)
+            ob_list.draw(self.display)
 
         if self.fire.firing:
-            self.fire.update(self.world_x, self.world_y)
-            self.firepower.draw(self.world)
+            self.fire.update(self.x, self.y)
+            self.firepower.draw(self.display)
 
         for enemy in self.enemy_list:
             enemy.move()
-            enemy.gravity(self.world_y, self.ty)
+            enemy.gravity(self.y, self.ty)
             enemy.update(
                 self.player,
                 self.enemy_list,
@@ -156,9 +184,5 @@ class World:
         for loot in self.loot_list:
             loot.update()
 
-        if self.player.reset_required:
-            self.player.reset()
-            self.reinitialise_lists()
-
     def stats(self, font, muted: bool):
-        stats(self.world, font, self.player.score, self.player.health, muted)
+        stats(self.display, font, self.player.score, self.player.health, muted)

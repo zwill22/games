@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os.path
+from pathlib import Path
 
 import pygame
 import pygame.freetype
@@ -75,25 +75,25 @@ def main():
     clock = pygame.time.Clock()
     pygame.init()
 
-    world = World(world_x, world_y, tx, ty, edges)
+    font = Path("fonts")
+    audio = Path("audio")
 
-    player = world.player
-
-    # Font setup
-    font_path = os.path.join("fonts", "Clickuper.ttf")
-    fontsize = tx
+    # Fonts
     pygame.freetype.init()
-    my_font = pygame.freetype.Font(font_path, size=fontsize)
+    fonts = {"main": pygame.freetype.Font(font / "Clickuper.ttf", size=tx)}
 
     # Sounds
     mute = False
     pygame.mixer.init()
-    pygame.mixer.music.load(os.path.join("sound", "ObservingTheStar.ogg"))
+    pygame.mixer.music.load(audio / "ObservingTheStar.ogg")
     pygame.mixer.music.play(-1)
 
     sounds = {
-        "flame": pygame.mixer.Sound(os.path.join("sound", "flame.ogg")),
+        "flame": pygame.mixer.Sound(audio / "flame.ogg"),
+        "burn": pygame.mixer.Sound(audio / "fire_sound_effect.mp3"),
     }
+
+    world = World(world_x, world_y, tx, ty, edges, sounds)
 
     """
     Main Loop
@@ -110,38 +110,38 @@ def main():
             if input_type == "mouse":
                 if event.type == pygame.MOUSEMOTION:
                     mx, _ = pygame.mouse.get_pos()
-                    x_max = world_x - player.image.get_size()[0]
+                    x_max = world.get_x_max()
 
                     if pygame.mouse.get_focused():
                         pygame.mouse.set_visible(False)
                         if mx < x_max:
                             dx, _ = pygame.mouse.get_rel()
-                            player.control(dx / steps, 0)
+                            world.control_player(dx / steps, 0)
                     else:
                         if pygame.mouse.get_visible() is False:
                             pygame.mouse.set_visible(True)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    player.jump()
+                    world.make_player_jump()
 
             elif input_type == "keyboard":
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT or event.key == ord("a"):
-                        player.control(-steps, 0)
-                        player.facing_right = False
+                        world.control_player(-steps, 0)
+                        world.player_left()
                     if event.key == pygame.K_RIGHT or event.key == ord("d"):
-                        player.control(steps, 0)
-                        player.facing_right = True
+                        world.control_player(steps, 0)
+                        world.player_right()
                     if event.key == pygame.K_UP or event.key == ord("w"):
-                        player.jump()
+                        world.make_player_jump()
                     if event.key == pygame.K_SPACE:
-                        world.fireball(sounds["flame"])
+                        world.fireball(sounds)
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == ord("a"):
-                        player.control(steps, 0)
+                        world.control_player(steps, 0)
                     if event.key == pygame.K_RIGHT or event.key == ord("d"):
-                        player.control(-steps, 0)
+                        world.control_player(-steps, 0)
             else:
                 raise ValueError("Invalid input type: {}".format(input_type))
 
@@ -159,7 +159,7 @@ def main():
                         pygame.mouse.set_visible(True)
                     else:
                         raise ValueError("Invalid input type: {}".format(input_type))
-                    player.stop()
+                    world.stop_player()
                 if event.key == ord("m"):
                     volume = 1 if mute else 0
 
@@ -170,7 +170,7 @@ def main():
 
         world.scroll()
         world.update()
-        world.stats(my_font, mute)
+        world.stats(fonts["main"], mute)
 
         pygame.display.flip()
         clock.tick(fps)

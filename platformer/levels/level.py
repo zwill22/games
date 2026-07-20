@@ -46,7 +46,7 @@ def platform(lvl, tx, ty, world_y) -> SpriteList:
     plat_list = SpriteList()
     platforms = []
     if lvl == 1:
-        platforms = [(5, 3, 3), (8, 5, 4), (12, 7, 3), (15, 5, 4), (18, 3, 3)]
+        platforms = [(5, 3, 3), (8, 5, 4), (12, 7, 3), (15, 5, 4), (19, 3, 3)]
     else:
         invalid_level(lvl)
 
@@ -64,8 +64,8 @@ def loot(lvl, tx, ty, world_y) -> SpriteList:
     loots = []
     final_loot = (0, 0)
     if lvl == 1:
-        loots = [(6, 4), (13, 8), (20, 8)]
-        final_loot = (26, 8)
+        loots = [(6, 4), (13, 8), (20, 4)]
+        final_loot = (26, 2)
     else:
         invalid_level(lvl)
 

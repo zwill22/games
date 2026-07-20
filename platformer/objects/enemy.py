@@ -16,18 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
-import os
 
 from platformer.engine import Sprite
 from platformer.objects import Player
-
-from pygame.mixer import Sound
 
 
 class Enemy(Sprite):
     """
     Spawn an enemy
     """
+
     def __init__(self, x, y, *imgs, **kwargs):
 
         Sprite.__init__(self, x, y, *imgs, **kwargs)
@@ -37,9 +35,6 @@ class Enemy(Sprite):
         self.is_falling = True
         self.health = 1
 
-        # TODO Remove sound
-        self.burn = Sound(os.path.join('sound', 'fire_sound_effect.mp3'))
-
     def move(self):
         """
         Enemy movement
@@ -47,15 +42,14 @@ class Enemy(Sprite):
         # TODO Remove magic numbers, make attributes
         speed = 4
         n = 20
-        
+
         sign = math.copysign(1, math.sin(self.counter * math.pi / n))
-        
+
         self.move_x = sign * speed
         if self.counter < 10 * n:
             self.counter += 1
         else:
             self.counter = 0
-        
 
     def gravity(self, world_y, ty):
         """
@@ -69,8 +63,7 @@ class Enemy(Sprite):
             self.move_y = 0
             self.rect.y = world_y - ty - ty
 
-    def update(self, player: Player, enemy_list, ground_list, plat_list,
-               firepower):
+    def update(self, player: Player, enemy_list, ground_list, plat_list, firepower):
         """
         Update sprite position and detect collisions
         """
@@ -83,7 +76,6 @@ class Enemy(Sprite):
         for _ in fire_hit_list:
             # TODO Add death animation
             enemy_list.remove(self)
-            self.burn.play(0, 150)
 
         for ob_list in (ground_list, plat_list):
             ground_hit_list = self.hit_list(ob_list)

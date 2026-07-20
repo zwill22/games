@@ -32,7 +32,7 @@ class Sprite(pygame.sprite.Sprite):
     Generic sprite class based on pygame's Sprite class
     """
 
-    def __init__(self, x_loc, y_loc, *images, image_dir="images", alpha=0, ani=4):
+    def __init__(self, x_loc, y_loc, *images, image_dir="images", ani=4):
         pygame.sprite.Sprite.__init__(self)
 
         self.initial_x = x_loc
@@ -56,6 +56,18 @@ class Sprite(pygame.sprite.Sprite):
         self.forward = True
 
         self.ani = ani
+
+    def reset(self):
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.x = self.initial_x
+        self.rect.y = self.initial_y
+
+        self.move_x = 0
+        self.move_y = 0
+
+        self.frame = 0
+        self.forward = True
 
     def hit_list(self, ob_list):
         return pygame.sprite.spritecollide(self, ob_list, False)
@@ -95,15 +107,3 @@ class Sprite(pygame.sprite.Sprite):
 
         self.rect.x += self.move_x
         self.rect.y += self.move_y
-
-    def reset(self):
-        self.image = self.images[0]
-        self.rect = self.image.get_rect()
-        self.rect.x = self.initial_x
-        self.rect.y = self.initial_y
-
-        self.move_x = 0
-        self.move_y = 0
-
-        self.frame = 0
-        self.forward = True
