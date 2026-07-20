@@ -86,11 +86,14 @@ def main():
     my_font = pygame.freetype.Font(font_path, size=fontsize)
 
     # Sounds
+    mute = False
     pygame.mixer.init()
-    pygame.mixer.music.load(os.path.join('sound', 'ObservingTheStar.ogg'))
+    pygame.mixer.music.load(os.path.join("sound", "ObservingTheStar.ogg"))
     pygame.mixer.music.play(-1)
 
-    flame = pygame.mixer.Sound(os.path.join('sound', 'flame.ogg'))
+    sounds = {
+        "flame": pygame.mixer.Sound(os.path.join("sound", "flame.ogg")),
+    }
 
     """
     Main Loop
@@ -100,21 +103,20 @@ def main():
         pygame.mouse.get_rel()
 
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return 0
 
             if input_type == "mouse":
                 if event.type == pygame.MOUSEMOTION:
-                    mx, my = pygame.mouse.get_pos()
+                    mx, _ = pygame.mouse.get_pos()
                     x_max = world_x - player.image.get_size()[0]
 
                     if pygame.mouse.get_focused():
                         pygame.mouse.set_visible(False)
                         if mx < x_max:
-                            dx, dy = pygame.mouse.get_rel()
-                            player.control(dx/steps, 0)
+                            dx, _ = pygame.mouse.get_rel()
+                            player.control(dx / steps, 0)
                     else:
                         if pygame.mouse.get_visible() is False:
                             pygame.mouse.set_visible(True)
@@ -124,30 +126,30 @@ def main():
 
             elif input_type == "keyboard":
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT or event.key == ord('a'):
+                    if event.key == pygame.K_LEFT or event.key == ord("a"):
                         player.control(-steps, 0)
                         player.facing_right = False
-                    if event.key == pygame.K_RIGHT or event.key == ord('d'):
+                    if event.key == pygame.K_RIGHT or event.key == ord("d"):
                         player.control(steps, 0)
                         player.facing_right = True
-                    if event.key == pygame.K_UP or event.key == ord('w'):
+                    if event.key == pygame.K_UP or event.key == ord("w"):
                         player.jump()
                     if event.key == pygame.K_SPACE:
-                        world.fireball(flame)
+                        world.fireball(sounds["flame"])
 
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_LEFT or event.key == ord('a'):
+                    if event.key == pygame.K_LEFT or event.key == ord("a"):
                         player.control(steps, 0)
-                    if event.key == pygame.K_RIGHT or event.key == ord('d'):
+                    if event.key == pygame.K_RIGHT or event.key == ord("d"):
                         player.control(-steps, 0)
             else:
                 raise ValueError("Invalid input type: {}".format(input_type))
 
             if event.type == pygame.KEYDOWN:
-                if event.key == ord('q') or event.key == pygame.K_ESCAPE:
+                if event.key == ord("q") or event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     return 0
-                if event.key == ord('i'):
+                if event.key == ord("i"):
                     if input_type == "keyboard":
                         input_type = "mouse"
                         if pygame.mouse.get_focused():
@@ -156,17 +158,23 @@ def main():
                         input_type = "keyboard"
                         pygame.mouse.set_visible(True)
                     else:
-                        raise ValueError(
-                            "Invalid input type: {}".format(input_type))
+                        raise ValueError("Invalid input type: {}".format(input_type))
                     player.stop()
+                if event.key == ord("m"):
+                    volume = 1 if mute else 0
+
+                    pygame.mixer.music.set_volume(volume)
+                    for sound in sounds.values():
+                        sound.set_volume(volume)
+                    mute = not mute
 
         world.scroll()
         world.update()
-        world.stats(my_font)
+        world.stats(my_font, mute)
 
         pygame.display.flip()
         clock.tick(fps)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

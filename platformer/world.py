@@ -9,7 +9,7 @@ from platformer.engine import SpriteList
 from platformer.objects import Throwable
 
 
-def stats(world, font: pygame.freetype.Font, score: int, health: int):
+def stats(world, font: pygame.freetype.Font, score: int, health: int, muted: bool):
     """
     Display the current score and health of the player
 
@@ -18,12 +18,12 @@ def stats(world, font: pygame.freetype.Font, score: int, health: int):
     :param score: Current score
     :param health: Current health
     """
-    font.render_to(
-        world, (4, 4), "Score: {}".format(score), (23, 23, 23), None, size=64
-    )
-    font.render_to(
-        world, (4, 72), "Health: {}".format(health), (23, 23, 23), None, size=64
-    )
+    colour = (20, 20, 20)
+    font.render_to(world, (4, 8), f"Score: {score}", colour, None, size=64)
+    font.render_to(world, (4, 76), f"Health: {health}", colour, None, size=64)
+
+    if muted:
+        font.render_to(world, (4, 144), "Muted", colour, None, size=64)
 
 
 def setup_firepower(player: Player):
@@ -155,11 +155,10 @@ class World:
 
         for loot in self.loot_list:
             loot.update()
-            
+
         if self.player.reset_required:
-             self.player.reset()
-             self.reinitialise_lists()
+            self.player.reset()
+            self.reinitialise_lists()
 
-    def stats(self, font):
-        stats(self.world, font, self.player.score, self.player.health)
-
+    def stats(self, font, muted: bool):
+        stats(self.world, font, self.player.score, self.player.health, muted)
