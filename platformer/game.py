@@ -57,13 +57,12 @@ TODO list
 
 
 def main():
-
-    world_x = 960
-    world_y = 720
-    fps = 40
-
     tx = 64
     ty = 64
+    
+    world_x = 16 * tx
+    world_y = 12 * ty
+    fps = 40
     steps = 10
     input_type = "keyboard"
 
