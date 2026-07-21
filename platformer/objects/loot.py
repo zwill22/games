@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+# by Zack M. Williams
+
+# # GPLv3
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from platformer.engine import Sprite
+
+
+class Loot(Sprite):
+    """
+    Spawn an enemy
+    """
+
+    def __init__(self, x, y, *imgs, kind="basic", **kwargs):
+
+        Sprite.__init__(self, x, y, *imgs, **kwargs, ani=8)
+
+        self.kind = kind
+
+    def update(self):
+        """
+        Update sprite position and detect collisions
+        """
+        n = len(self.images)
+
+        if n > 1:
+            self.frame += 1
+            if self.frame > (n - 1) * self.ani:
+                self.frame = 0
+
+        self.image = self.images[self.frame // self.ani]

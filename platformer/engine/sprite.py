@@ -1,12 +1,13 @@
 import pygame
 
-import os
+from platformer.engine.image import load_image
 
 
 class SpriteList:
     """
     Wrapper for pygame's Group class
     """
+
     def __init__(self):
         self.list = pygame.sprite.Group()
 
@@ -30,15 +31,16 @@ class Sprite(pygame.sprite.Sprite):
     """
     Generic sprite class based on pygame's Sprite class
     """
-    def __init__(self, x_loc, y_loc, *images, image_dir='images', alpha=0,
-                 ani=4):
+
+    def __init__(self, x_loc, y_loc, *images, ani=4):
         pygame.sprite.Sprite.__init__(self)
+
+        self.initial_x = x_loc
+        self.initial_y = y_loc
 
         self.images = []
         for image in images:
-            img = pygame.image.load(os.path.join(image_dir, image)).convert()
-            img.convert_alpha()
-            img.set_colorkey(alpha)
+            img = load_image(image)
             self.images.append(img)
         self.image = self.images[0]
         self.rect = self.image.get_rect()
@@ -52,6 +54,18 @@ class Sprite(pygame.sprite.Sprite):
         self.forward = True
 
         self.ani = ani
+
+    def reset(self):
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.x = self.initial_x
+        self.rect.y = self.initial_y
+
+        self.move_x = 0
+        self.move_y = 0
+
+        self.frame = 0
+        self.forward = True
 
     def hit_list(self, ob_list):
         return pygame.sprite.spritecollide(self, ob_list, False)
@@ -83,11 +97,11 @@ class Sprite(pygame.sprite.Sprite):
 
         if self.move_x < 0:
             self.image = pygame.transform.flip(
-                self.images[self.frame//self.ani], True, False
+                self.images[self.frame // self.ani], True, False
             )
 
         if self.move_x > 0:
-            self.image = self.images[self.frame//self.ani]
+            self.image = self.images[self.frame // self.ani]
 
         self.rect.x += self.move_x
         self.rect.y += self.move_y

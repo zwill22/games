@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "PlatformGame"
+description = "A Simple Platform game built using PyGame"
+requires-python = ">= 3.10"
+authors = [{ name = "Z M Williams", email = "z.m.will@icloud.com" }]
+version = "0.2.0"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "pillow>=12.3.0",
+    "pygame>=2.6.1",
+]
+keywords = ["PyGame", "Python", "Platformer"]
+classifiers = [
+    "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
+    "Programming Language :: Python",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Games/Entertainment",
+]
+
+[dependency-groups]
+dev = ["pytest", "coverage", "ruff"]
+
+[project.urls]
+Repository = "https://github.com/zwill22/games"
+
+[tool.hatch.build.targets.wheel]
+packages = ["platformer"]
+
+[project.scripts]
+game = "platformer.game:main"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q -v"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.coverage.run]
+branch = true
+command_line = "-m pytest"
+omit = ["tests/*", "docs/*"]
+
+[tool.coverage.report]
+ignore_errors = true
+fail_under = 80
+skip_empty = true
