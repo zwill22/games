@@ -14,6 +14,7 @@ def stats(world, font: pygame.freetype.Font, score: int, health: int, muted: boo
     :param font: Font for rendering stats
     :param score: Current score
     :param health: Current health
+    :param muted: Whether the sound is muted
     """
     colour = (20, 20, 20)
     font.render_to(world, (4, 8), f"Score: {score}", colour, None, size=64)
@@ -21,6 +22,31 @@ def stats(world, font: pygame.freetype.Font, score: int, health: int, muted: boo
 
     if muted:
         font.render_to(world, (4, 144), "Muted", colour, None, size=64)
+
+
+def game_over(world, font: pygame.freetype.Font, muted: bool):
+    """
+    Display the Game Over message on screen
+
+    :param world: Game world in which to render stats
+    :param font: Font for rendering text
+    :param muted: Whether the sound is muted
+    """
+    w = world.get_width()
+    h = world.get_height()
+    s = 128
+
+    x0 = w / 2 - s * 2
+    y0 = h / 2 - s
+
+    colour = (40, 40, 40)
+    font.render_to(world, (x0, y0), "Game", colour, None, size=128)
+    font.render_to(world, (x0, y0 + s), "Over!", colour, None, size=s)
+
+    font.render_to(world, (x0, y0 + 2 * s), "Press 'q' to Quit", colour, None, size=32)
+
+    if muted:
+        font.render_to(world, (4, 8), "Muted", colour, None, size=64)
 
 
 def setup_firepower(player: Player):
@@ -34,15 +60,13 @@ def setup_firepower(player: Player):
 
 class World:
     def __init__(self, world_x, world_y, tx, ty, edges, sounds):
-        self.x = world_x
-        self.y = world_y
-
         self.tx = tx
         self.ty = ty
         self.edges = edges
         self.level = 1
 
         self.display = pygame.display.set_mode([world_x, world_y])
+
         self.backdrop = load_image(f"background-{self.level}.png")
 
         # Player setup
@@ -54,13 +78,15 @@ class World:
         self.reinitialise_lists()
 
     def reinitialise_lists(self):
-        self.ground_list = level.ground(1, self.tx, self.ty, self.y)
-        self.plat_list = level.platform(1, self.tx, self.ty, self.y)
-        self.enemy_list = level.enemies(1, self.tx, self.ty, self.y)
-        self.loot_list = level.loot(1, self.tx, self.ty, self.y)
+        y = self.display.get_height()
+
+        self.ground_list = level.ground(1, self.tx, self.ty, y)
+        self.plat_list = level.platform(1, self.tx, self.ty, y)
+        self.enemy_list = level.enemies(1, self.tx, self.ty, y)
+        self.loot_list = level.loot(1, self.tx, self.ty, y)
 
     def get_x_max(self):
-        return self.x - self.player.image.get_size()[0]
+        return self.display.get_width() - self.player.image.get_width()
 
     def control_player(self, x, y):
 
@@ -71,6 +97,9 @@ class World:
 
     def player_right(self):
         self.player.facing_right = True
+
+    def game_over(self):
+        return self.player.health <= 0
 
     def make_player_jump(self):
         self.player.jump()
@@ -140,15 +169,21 @@ class World:
             pygame.mixer.Sound.play(flame)
             self.firepower.add(self.fire)
 
-    def update(self):
+    def set_display(self):
         self.display.blit(self.backdrop, self.display.get_rect())
+
+    def update(self):
+        self.set_display()
+
+        x = self.display.get_width()
+        y = self.display.get_height()
 
         self.player.update(
             self.enemy_list,
             self.ground_list,
             self.plat_list,
             self.loot_list,
-            self.y,
+            y,
         )
 
         if self.player.reset_required:
@@ -167,12 +202,12 @@ class World:
             ob_list.draw(self.display)
 
         if self.fire.firing:
-            self.fire.update(self.x, self.y)
+            self.fire.update(x, y)
             self.firepower.draw(self.display)
 
         for enemy in self.enemy_list:
             enemy.move()
-            enemy.gravity(self.y, self.ty)
+            enemy.gravity(y, self.ty)
             enemy.update(
                 self.player,
                 self.enemy_list,
@@ -186,3 +221,8 @@ class World:
 
     def stats(self, font, muted: bool):
         stats(self.display, font, self.player.score, self.player.health, muted)
+
+    def game_over_screen(self, font, muted):
+        self.set_display()
+
+        game_over(self.display, font, muted)

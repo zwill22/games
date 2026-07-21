@@ -168,9 +168,12 @@ def main():
                         sound.set_volume(volume)
                     mute = not mute
 
-        world.scroll()
-        world.update()
-        world.stats(fonts["main"], mute)
+        if world.game_over():
+            world.game_over_screen(fonts["main"], mute)
+        else:
+            world.scroll()
+            world.update()
+            world.stats(fonts["main"], mute)
 
         pygame.display.flip()
         clock.tick(fps)
