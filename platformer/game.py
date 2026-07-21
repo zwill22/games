@@ -172,7 +172,7 @@ def main():
         else:
             world.scroll()
             world.update()
-            world.stats(fonts["main"], mute)
+            world.show_stats(fonts["main"], mute)
 
         pygame.display.flip()
         clock.tick(fps)

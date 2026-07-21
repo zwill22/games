@@ -6,24 +6,6 @@ from platformer.engine import SpriteList, load_image
 from platformer.objects import Throwable
 
 
-def stats(world, font: pygame.freetype.Font, score: int, health: int, muted: bool):
-    """
-    Display the current score and health of the player
-
-    :param world: Game world in which to render stats
-    :param font: Font for rendering stats
-    :param score: Current score
-    :param health: Current health
-    :param muted: Whether the sound is muted
-    """
-    colour = (20, 20, 20)
-    font.render_to(world, (4, 8), f"Score: {score}", colour, None, size=64)
-    font.render_to(world, (4, 76), f"Health: {health}", colour, None, size=64)
-
-    if muted:
-        font.render_to(world, (4, 144), "Muted", colour, None, size=64)
-
-
 def game_over(world, font: pygame.freetype.Font, muted: bool):
     """
     Display the Game Over message on screen
@@ -241,8 +223,48 @@ class World:
         for loot in self.loot_list:
             loot.update()
 
-    def stats(self, font, muted: bool):
-        stats(self.display, font, self.player.score, self.player.health, muted)
+    def show_stats(self, font, muted: bool):
+        size = 64
+        colour = (20, 20, 20)
+
+        x0 = 4
+        y0 = 8
+
+        x = self.display.get_width()
+
+        font.render_to(
+            self.display,
+            (x0, y0),
+            f"Score: {self.player.score}",
+            colour,
+            None,
+            size=size,
+        )
+
+        font.render_to(
+            self.display,
+            (x0, y0 + 64),
+            f"Health: {self.player.health}",
+            colour,
+            None,
+            size=size,
+        )
+
+        level = f"Level {self.level}"
+
+        font.render_to(
+            self.display, (x - 0.6 * size * len(level), y0), level, None, size=size
+        )
+
+        if muted:
+            font.render_to(
+                self.display,
+                (x - 4 * size, y0 + size),
+                "Muted",
+                colour,
+                None,
+                size=size,
+            )
 
     def game_over_screen(self, font, muted):
         self.set_display()
