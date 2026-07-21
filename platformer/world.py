@@ -59,7 +59,7 @@ def setup_firepower(player: Player):
 
 
 class World:
-    def __init__(self, world_x, world_y, tx, ty, edges, sounds):
+    def __init__(self, world_x, world_y, tx, ty, edges):
         self.tx = tx
         self.ty = ty
         self.edges = edges
@@ -67,7 +67,7 @@ class World:
 
         self.display = pygame.display.set_mode([world_x, world_y])
 
-        self.backdrop = load_image(f"background-{self.level}.png")
+        self.setup_background(world_x, world_y)
 
         # Player setup
         self.player = Player(0, world_y / 2)
@@ -76,6 +76,21 @@ class World:
         self.fire, self.firepower = setup_firepower(self.player)
 
         self.reinitialise_lists()
+
+    def setup_background(self, world_x, world_y):
+        self.backdrop = load_image(f"background-{self.level}.png")
+
+        w = self.backdrop.get_width()
+        h = self.backdrop.get_height()
+
+        scale = max(world_x / w, world_y / h)
+
+        w_new = scale * w
+        h_new = scale * h
+
+        self.offset = (w_new - world_x, h_new - world_y)
+
+        self.backdrop = pygame.transform.scale(self.backdrop, (w_new, h_new))
 
     def reinitialise_lists(self):
         y = self.display.get_height()
@@ -170,7 +185,14 @@ class World:
             self.firepower.add(self.fire)
 
     def set_display(self):
-        self.display.blit(self.backdrop, self.display.get_rect())
+        rect = self.display.get_rect()
+        rect.x -= self.offset[0] / 2
+        rect.y -= self.offset[1] / 2
+        self.display.blit(self.backdrop, rect)
+
+    def new_level(self):
+        self.level += 1
+        self.reset()
 
     def update(self):
         self.set_display()
