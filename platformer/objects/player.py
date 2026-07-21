@@ -13,7 +13,7 @@ class Player(Sprite):
     """
 
     def __init__(self, x, y, **kwargs):
-        hero = ["hero-0.png"]
+        hero = [f"hero-{i}.png" for i in [0, 1]]
 
         Sprite.__init__(self, x, y, *hero, **kwargs)
 

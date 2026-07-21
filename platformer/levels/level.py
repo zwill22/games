@@ -36,7 +36,7 @@ def ground(lvl, tx, ty, world_y) -> SpriteList:
         invalid_level(lvl)
 
     for g in gloc:
-        gr = Platform(g * tx, world_y - ty, "tile-ground.png")
+        gr = Platform(g * tx, world_y - ty, "ground.png")
         ground_list.add(gr)
 
     return ground_list
@@ -69,7 +69,7 @@ def loot(lvl, tx, ty, world_y) -> SpriteList:
     else:
         invalid_level(lvl)
 
-    images = [f"loot-{i}.png" for i in [1, 2, 3, 2]]
+    images = [f"loot-{i}.png" for i in [0, 1, 2, 1]]
     for gem in loots:
         loot_gem = Loot(gem[0] * tx, world_y - gem[1] * ty, *images)
         loot_list.add(loot_gem)
