@@ -62,21 +62,19 @@ def loot(lvl, tx, ty, world_y) -> SpriteList:
     loot_list = SpriteList()
 
     loots = []
-    final_loot = (0, 0)
     if lvl == 1:
-        loots = [(6, 4), (13, 8), (20, 4)]
-        final_loot = (26, 2)
+        loots = [(6, 4), (13, 8), (20, 4), (25, 2, "final")]
     else:
         invalid_level(lvl)
 
-    images = [f"loot-{i}.png" for i in [0, 1, 2, 1]]
+    images = {
+        "basic": [f"loot-{i}.png" for i in [0, 1, 2, 1]],
+        "final": [f"final-{i}.png" for i in [0, 1, 2, 1]],
+    }
     for gem in loots:
-        loot_gem = Loot(gem[0] * tx, world_y - gem[1] * ty, *images)
+        kind = gem[2] if len(gem) == 3 else "basic"
+        loot_gem = Loot(gem[0] * tx, world_y - gem[1] * ty, *images[kind], kind=kind)
         loot_list.add(loot_gem)
-
-    loot_list.add(
-        Loot(final_loot[0] * tx, world_y - final_loot[1] * ty, "final-loot.png")
-    )
 
     return loot_list
 

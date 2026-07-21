@@ -23,9 +23,11 @@ class Loot(Sprite):
     Spawn an enemy
     """
 
-    def __init__(self, x, y, *imgs, **kwargs):
+    def __init__(self, x, y, *imgs, kind="basic", **kwargs):
 
         Sprite.__init__(self, x, y, *imgs, **kwargs, ani=8)
+
+        self.kind = kind
 
     def update(self):
         """
