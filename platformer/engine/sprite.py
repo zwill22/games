@@ -1,6 +1,6 @@
 import pygame
 
-import os
+from platformer.engine.image import load_image
 
 
 class SpriteList:
@@ -32,7 +32,7 @@ class Sprite(pygame.sprite.Sprite):
     Generic sprite class based on pygame's Sprite class
     """
 
-    def __init__(self, x_loc, y_loc, *images, image_dir="images", ani=4):
+    def __init__(self, x_loc, y_loc, *images, ani=4):
         pygame.sprite.Sprite.__init__(self)
 
         self.initial_x = x_loc
@@ -40,9 +40,7 @@ class Sprite(pygame.sprite.Sprite):
 
         self.images = []
         for image in images:
-            img = pygame.image.load(os.path.join(image_dir, image))
-            # img.convert_alpha()
-            # img.set_colorkey(1)
+            img = load_image(image)
             self.images.append(img)
         self.image = self.images[0]
         self.rect = self.image.get_rect()

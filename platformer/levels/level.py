@@ -22,7 +22,10 @@ from platformer.objects.loot import Loot
 
 
 def invalid_level(lvl):
-    raise ValueError("Invalid level: {}".format(lvl))
+    if lvl > 0:
+        raise ValueError(f"Level not implemented: {lvl}")
+    else:
+        raise TypeError(f"Invalid level: {lvl}")
 
 
 def get_gloc(lvl):
