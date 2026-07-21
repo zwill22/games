@@ -137,10 +137,8 @@ def main():
                         world.fireball(sounds)
 
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_LEFT or event.key == ord("a"):
-                        world.control_player(steps, 0)
-                    if event.key == pygame.K_RIGHT or event.key == ord("d"):
-                        world.control_player(-steps, 0)
+                    if event.key == pygame.K_LEFT or event.key == ord("a") or event.key == pygame.K_RIGHT or event.key == ord("d"):
+                        world.stop_player()
             else:
                 raise ValueError("Invalid input type: {}".format(input_type))
 
