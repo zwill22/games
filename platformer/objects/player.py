@@ -27,6 +27,7 @@ class Player(Sprite):
         self.facing_right = True
 
         self.reset_required = False
+        self.level_complete = False
 
     def gravity(self):
         if self.is_jumping:
@@ -74,8 +75,12 @@ class Player(Sprite):
 
         loot_hit_list = self.hit_list(loot_list)
         for loot in loot_hit_list:
-            loot_list.remove(loot)
-            self.score += 1
+            if loot.kind == "basic":
+                loot_list.remove(loot)
+                self.score += 1
+            elif loot.kind == "final":
+                self.level_complete = True
+                return
 
         plat_hit_list = self.hit_list(plat_list)
         for p in plat_hit_list:

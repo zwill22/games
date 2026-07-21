@@ -57,6 +57,8 @@ class World:
         # Firepower setup
         self.fire, self.firepower = setup_firepower(self.player)
 
+        self.complete = False
+
         self.reinitialise_lists()
 
     def setup_background(self, world_x, world_y):
@@ -77,10 +79,14 @@ class World:
     def reinitialise_lists(self):
         y = self.display.get_height()
 
-        self.ground_list = level.ground(1, self.tx, self.ty, y)
-        self.plat_list = level.platform(1, self.tx, self.ty, y)
-        self.enemy_list = level.enemies(1, self.tx, self.ty, y)
-        self.loot_list = level.loot(1, self.tx, self.ty, y)
+        try:
+            self.ground_list = level.ground(self.level, self.tx, self.ty, y)
+            self.underground_list = level.underground(self.level, self.tx, self.ty, y)
+            self.plat_list = level.platform(self.level, self.tx, self.ty, y)
+            self.enemy_list = level.enemies(self.level, self.tx, self.ty, y)
+            self.loot_list = level.loot(self.level, self.tx, self.ty, y)
+        except ValueError:
+            self.complete = True
 
     def get_x_max(self):
         return self.display.get_width() - self.player.image.get_width()
@@ -96,7 +102,7 @@ class World:
         self.player.facing_right = True
 
     def game_over(self):
-        return self.player.health <= 0
+        return self.player.health <= 0 or self.complete
 
     def make_player_jump(self):
         self.player.jump()
@@ -116,6 +122,7 @@ class World:
             self.enemy_list,
             self.loot_list,
             self.ground_list,
+            self.underground_list,
         ):
             for ob in ob_list:
                 ob.rect.x += scroll
@@ -128,6 +135,7 @@ class World:
             self.enemy_list,
             self.loot_list,
             self.ground_list,
+            self.underground_list,
         ):
             for ob in ob_list:
                 ob.rect.y += scroll
@@ -190,6 +198,10 @@ class World:
             y,
         )
 
+        if self.player.level_complete:
+            self.new_level()
+            return
+
         if self.player.reset_required:
             self.reset()
             return
@@ -198,6 +210,7 @@ class World:
 
         for ob_list in (
             self.ground_list,
+            self.underground_list,
             self.plat_list,
             self.player,
             self.enemy_list,

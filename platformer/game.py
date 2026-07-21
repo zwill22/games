@@ -59,7 +59,7 @@ TODO list
 def main():
     tx = 64
     ty = 64
-    
+
     world_x = 16 * tx
     world_y = 12 * ty
     fps = 40
@@ -92,7 +92,7 @@ def main():
         "burn": pygame.mixer.Sound(audio / "fire_sound_effect.mp3"),
     }
 
-    world = World(world_x, world_y, tx, ty, edges, sounds)
+    world = World(world_x, world_y, tx, ty, edges)
 
     """
     Main Loop

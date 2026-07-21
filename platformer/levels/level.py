@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from platformer.engine.sprite import Sprite
 from platformer.objects import Platform, Enemy
 from platformer.engine import SpriteList
 from platformer.objects.loot import Loot
@@ -24,9 +25,7 @@ def invalid_level(lvl):
     raise ValueError("Invalid level: {}".format(lvl))
 
 
-def ground(lvl, tx, ty, world_y) -> SpriteList:
-    ground_list = SpriteList()
-
+def get_gloc(lvl):
     gloc = []
 
     if lvl == 1:
@@ -35,11 +34,34 @@ def ground(lvl, tx, ty, world_y) -> SpriteList:
     else:
         invalid_level(lvl)
 
+    return gloc
+
+
+def ground(lvl, tx, ty, world_y) -> SpriteList:
+    ground_list = SpriteList()
+
+    gloc = get_gloc(lvl)
+
     for g in gloc:
         gr = Platform(g * tx, world_y - ty, "ground.png")
+
         ground_list.add(gr)
 
     return ground_list
+
+
+def underground(lvl, tx, ty, world_y) -> SpriteList:
+    underground_list = SpriteList()
+
+    gloc = get_gloc(lvl)
+
+    for g in gloc:
+        h = world_y // ty
+        for i in range(6 * h):
+            underground = Sprite(g * tx, world_y + i * ty, "underground.png")
+            underground_list.add(underground)
+
+    return underground_list
 
 
 def platform(lvl, tx, ty, world_y) -> SpriteList:
